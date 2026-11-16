@@ -118,6 +118,8 @@ fun MainScreen(
     var showHidden by remember { mutableStateOf(false) }
     var editItem by remember { mutableStateOf<PluginUiItem?>(null) }
     var pendingStartItem by remember { mutableStateOf<PluginUiItem?>(null) }
+    // Delete confirmation dialog
+    var deleteConfirmItem by remember { mutableStateOf<PluginUiItem?>(null) }
 
     // AtolyeApplication instance for cycleTheme
     val app = context.applicationContext as AtolyeApplication
@@ -130,6 +132,8 @@ fun MainScreen(
 
     val visibleItems = if (showHidden) items else items.filter { !it.hidden }
     val hiddenCount = items.count { it.hidden }
+    // Full list including hidden items for reorder mapping
+    val fullItems = items
 
     fun tryTogglePower(item: PluginUiItem) {
         if (item.runtime.running) {
@@ -218,12 +222,16 @@ fun MainScreen(
                         onPowerClick = { tryTogglePower(it) },
                         onHideToggle = { viewModel.setPluginHidden(it.plugin.metadata.pluginId, !it.hidden) },
                         onEditCard = { editItem = it },
-                        onDeleteClick = { item ->
-                            // TODO: Implement delete confirmation dialog and uninstall logic
-                            // viewModel.uninstallPlugin(item.plugin.packageName)
-                        },
+                        onDeleteClick = { item -> deleteConfirmItem = item },
                         onQuickSettingChange = { item, k, v -> viewModel.setQuickSetting(item, k, v) },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        onReorder = { fromIndex, toIndex ->
+                            // Map visible indices back to full items indices for persistence
+                            val visibleToFull = visibleItems.map { fullItems.indexOf(it) }
+                            val fromFull = visibleToFull[fromIndex]
+                            val toFull = visibleToFull[toIndex]
+                            viewModel.updatePluginOrder(fromFull, toFull)
+                        }
                     )
                 }
             }
@@ -264,6 +272,22 @@ fun MainScreen(
                     pendingStartItem = null
                     viewModel.sendStart(toStart)
                 }) { Text(stringResource(R.string.not_now)) }
+            }
+        )
+    }
+    deleteConfirmItem?.let { item ->
+        AlertDialog(
+            onDismissRequest = { deleteConfirmItem = null },
+            title = { Text(stringResource(R.string.card_delete_title)) },
+            text = { Text(stringResource(R.string.card_delete_message, item.plugin.metadata.name)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.uninstallPlugin(item.plugin.packageName)
+                    deleteConfirmItem = null
+                }) { Text(stringResource(R.string.ok)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteConfirmItem = null }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }

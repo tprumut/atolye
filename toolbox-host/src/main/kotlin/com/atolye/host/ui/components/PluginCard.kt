@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -84,6 +85,7 @@ fun PluginCard(
     onEditCard: () -> Unit,
     onDeleteClick: () -> Unit,
     onQuickSettingChange: (key: String, value: String) -> Unit,
+    onDragStart: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val plugin = item.plugin
@@ -95,10 +97,42 @@ fun PluginCard(
     val powerDesc = if (running) stringResource(R.string.power_on_state, metadata.name)
     else stringResource(R.string.power_off_state, metadata.name)
 
+    val dragState = remember { mutableStateOf(false) }
+    val dragStart = onDragStart
+
     AtolyeCard(
         modifier = modifier
             .fillMaxWidth()
-            .combinedClickable(onClick = onCardClick, onLongClick = { menuExpanded = true }),
+            .combinedClickable(
+                onClick = onCardClick,
+                onLongClick = { menuExpanded = true }
+            )
+            .pointerInput(Unit) {
+                // Manual drag detection for reorder
+                var dragStarted = false
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        val changes = event.changes
+                        for (change in changes) {
+                            when (change.type) {
+                                androidx.compose.ui.input.pointer.PointerType.Mouse -> {}
+                                else -> {
+                                    if (change.pressed && !dragStarted) {
+                                        dragStarted = true
+                                        dragState.value = true
+                                        dragStart?.invoke()
+                                    } else if (!change.pressed && dragStarted) {
+                                        dragStarted = false
+                                        dragState.value = false
+                                    }
+                                }
+                            }
+                        }
+                        if (event.changes.any { it.type == androidx.compose.ui.input.pointer.PointerType.Mouse }) {}
+                    }
+                }
+            },
         accent = accent,
         onClick = onCardClick,
         onLongClick = { menuExpanded = true }

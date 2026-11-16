@@ -41,6 +41,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val runtime = mutableMapOf<String, PluginRuntimeState>()
 
+    // Drag-drop reorder: persist order to SharedPreferences
+    private fun savePluginOrder(itemList: List<PluginUiItem>) {
+        val order = itemList.map { it.plugin.metadata.pluginId }.joinToString(",")
+        hostPrefs.edit().putString(HostPrefs.PLUGIN_ORDER_KEY, order).apply()
+    }
+
+    private fun applySavedOrder(discovered: List<PluginUiItem>): List<PluginUiItem> {
+        val saved = hostPrefs.getString(HostPrefs.PLUGIN_ORDER_KEY, "")?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
+        if (saved.isEmpty()) return discovered
+        val byId = discovered.associateBy { it.plugin.metadata.pluginId }
+        val ordered = saved.mapNotNull { byId[it] }
+        // Add any new plugins not in saved order at the end
+        val remaining = discovered.filter { it.plugin.metadata.pluginId !in saved }
+        return ordered + remaining
+    }
+
     private val statusReceiver = PluginStatusReceiver().apply {
         setListener { status ->
             val prev = runtime[status.pluginId] ?: PluginRuntimeState()
@@ -85,8 +101,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         visibleQuickSettingKeys = visibleQs
                     )
                 }
-                _items.value = newItems
-                if (requestState) requestStates(newItems)
+                // Apply saved drag-drop order
+                val orderedItems = applySavedOrder(newItems)
+                _items.value = orderedItems
+                if (requestState) requestStates(orderedItems)
             } catch (e: Exception) {
                 _error.value = e.message ?: "Eklentiler yüklenemedi"
             } finally {
@@ -137,6 +155,33 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun launchPlugin(item: PluginUiItem): Boolean = discovery.launchPlugin(item.plugin)
     fun openPluginSettings(item: PluginUiItem): Boolean = discovery.openPluginSettings(item.plugin)
+
+    // Update plugin order (for drag-drop reorder) and persist
+    fun updatePluginOrder(fromIndex: Int, toIndex: Int) {
+        _items.update { list ->
+            if (fromIndex < 0 || fromIndex >= list.size || toIndex < 0 || toIndex >= list.size) return@update list
+            val mutable = list.toMutableList()
+            val item = mutable.removeAt(fromIndex)
+            mutable.add(toIndex, item)
+            savePluginOrder(mutable)
+            mutable
+        }
+    }
+
+    // Uninstall plugin (for delete action)
+    fun uninstallPlugin(packageName: String): Boolean {
+        val uri = Uri.parse("package:$packageName")
+        val intent = Intent(Intent.ACTION_DELETE, uri).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        return try {
+            appContext.startActivity(intent)
+            true
+        } catch (e: Exception) {
+            _error.value = "Silme işlemi başlatılamadı: ${e.message}"
+            false
+        }
+    }
 
     fun isIgnoringBatteryOptimizations(): Boolean {
         val pm = appContext.getSystemService(PowerManager::class.java) ?: return true

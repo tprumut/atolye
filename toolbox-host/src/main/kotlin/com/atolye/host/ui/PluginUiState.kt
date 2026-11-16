@@ -21,4 +21,5 @@ object HostPrefs {
     const val HOST_PREFS = "host_settings"
     fun hiddenKey(pluginId: String) = "hidden_$pluginId"
     fun qsVisibleKey(pluginId: String) = "qs_visible_$pluginId" // comma-separated keys
+    const val PLUGIN_ORDER_KEY = "plugin_order" // comma-separated pluginIds
 }

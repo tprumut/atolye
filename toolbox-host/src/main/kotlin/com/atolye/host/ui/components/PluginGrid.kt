@@ -43,6 +43,7 @@ fun PluginGrid(
     onEditCard: (PluginUiItem) -> Unit,
     onDeleteClick: (PluginUiItem) -> Unit,
     onQuickSettingChange: (PluginUiItem, String, String) -> Unit,
+    onReorder: ((Int, Int) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
@@ -59,6 +60,7 @@ fun PluginGrid(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(items, key = { it.plugin.packageName }) { item ->
+                val index = items.indexOf(item)
                 PluginCard(
                     item = item,
                     onCardClick = { onPluginClick(item) },
@@ -66,7 +68,10 @@ fun PluginGrid(
                     onHideToggle = { onHideToggle(item) },
                     onEditCard = { onEditCard(item) },
                     onDeleteClick = { onDeleteClick(item) },
-                    onQuickSettingChange = { k, v -> onQuickSettingChange(item, k, v) }
+                    onQuickSettingChange = { k, v -> onQuickSettingChange(item, k, v) },
+                    onDragStart = onReorder?.let { reorder ->
+                        { reorder(index, index) } // placeholder - actual drag logic in PluginCard
+                    }
                 )
             }
         }

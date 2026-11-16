@@ -37,6 +37,8 @@
     <string name="card_show">Kartı göster</string>
     <string name="card_edit">Kartı düzenle</string>
     <string name="card_delete">Kartı sil</string>
+    <string name="card_delete_title">Eklentiyi kaldır</string>
+    <string name="card_delete_message">%1$s eklentisi cihazdan kaldırılacak. Devam etmek istiyor musunuz?</string>
     <string name="card_edit_title">Kartı düzenle</string>
     <string name="card_edit_desc">Kartta görünecek 3 hızlı ayarı seçin.</string>
     <string name="show_hidden">Gizlenenleri göster</string>
