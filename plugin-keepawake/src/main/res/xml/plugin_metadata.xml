@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<plugin-metadata
+    pluginId="com.toolbox.plugin.keepawake"
+    version="1"
+    minHostVersion="1"
+    nameRes="@string/plugin_keepawake_name"
+    descriptionRes="@string/plugin_keepawake_desc"
+    iconRes="@drawable/ic_keepawake"
+    settingsActivity="com.toolbox.plugin.keepawake.KeepAwakeSettingsActivity"
+    mainActivity="com.toolbox.plugin.keepawake.KeepAwakePluginActivity"
+    category="DISPLAY"
+    tags="ekran, açık, tut, wake, keep, screen"
+    downloadUrl="https://github.com/toolbox/plugins/releases/latest/download/keepawake.apk"
+    minSdk="26">
+    <required-permissions>
+        <permission
+            name="android.permission.SYSTEM_ALERT_WINDOW"
+            titleRes="@string/permission_system_alert_window_title"
+            descriptionRes="@string/permission_system_alert_window_desc"
+            isRequired="true" />
+        <permission
+            name="android.permission.WAKE_LOCK"
+            titleRes="@string/permission_wake_lock_title"
+            descriptionRes="@string/permission_wake_lock_desc"
+            isRequired="true" />
+        <permission
+            name="android.permission.PACKAGE_USAGE_STATS"
+            titleRes="@string/permission_usage_stats_title"
+            descriptionRes="@string/permission_usage_stats_desc"
+            isRequired="false" />
+        <permission
+            name="android.permission.FOREGROUND_SERVICE"
+            titleRes="@string/permission_foreground_service_title"
+            descriptionRes="@string/permission_foreground_service_desc"
+            isRequired="true" />
+        <permission
+            name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
+            titleRes="@string/permission_foreground_service_title"
+            descriptionRes="@string/permission_foreground_service_desc"
+            isRequired="true" />
+        <permission
+            name="android.permission.POST_NOTIFICATIONS"
+            titleRes="@string/permission_post_notifications_title"
+            descriptionRes="@string/permission_post_notifications_desc"
+            isRequired="true" />
+    </required-permissions>
+</plugin-metadata>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="speedmeter_primary">#00B0FF</color>
+    <color name="speedmeter_primary_container">#003A5C</color>
+    <color name="speedmeter_secondary">#4CAF50</color>
+    <color name="speedmeter_secondary_container">#1B5E20</color>
+    <color name="speedmeter_tertiary">#FF9800</color>
+    <color name="speedmeter_tertiary_container">#E65100</color>
+</resources>

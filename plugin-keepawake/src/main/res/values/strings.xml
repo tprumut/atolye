@@ -1,0 +1,82 @@
+<resources>
+    <!-- Plugin Info -->
+    <string name="plugin_keepawake_name">Ekranı Açık Tut</string>
+    <string name="plugin_keepawake_desc">Tek dokunuşla ekranın kapanmasını engeller, uygulama bazlı mod destekler.</string>
+    <string name="plugin_keepawake_short">Ekran Açık</string>
+
+    <!-- Settings -->
+    <string name="keepawake_settings_title">Ekranı Açık Tut Ayarları</string>
+    <string name="keepawake_mode">Mod</string>
+    <string name="keepawake_mode_desc">Ekranı nasıl açık tutacak</string>
+    <string name="keepawake_mode_manual">Manuel (Dokunarak)</string>
+    <string name="keepawake_mode_manual_desc">Aç/Kapa butonu ile kontrol edin</string>
+    <string name="keepawake_mode_timer">Süreli (15dk, 1sa, ...)</string>
+    <string name="keepawake_mode_timer_desc">Belirlenen süre sonra ekran normal döner</string>
+    <string name="keepawake_mode_infinite">Süresiz</string>
+    <string name="keepawake_mode_infinite_desc">Manuel kapatılana kadar ekran açık kalır</string>
+    <string name="keepawake_mode_app_based">Uygulama Bazlı</string>
+    <string name="keepawake_mode_app_based_desc">Seçilen uygulamalarda ekran açık kalır</string>
+    <string name="keepawake_timer_duration">Süre</string>
+    <string name="keepawake_timer_15min">15 Dakika</string>
+    <string name="keepawake_timer_30min">30 Dakika</string>
+    <string name="keepawake_timer_1hour">1 Saat</string>
+    <string name="keepawake_timer_2hour">2 Saat</string>
+    <string name="keepawake_app_list">Uygulama Listesi</string>
+    <string name="keepawake_app_list_desc">Seçilen uygulamalarda ekran açık kalsın</string>
+    <string name="keepawake_show_notification">Bildirim Göster</string>
+    <string name="keepawake_show_notification_desc">Ekran açıkken durumu bildirimde göster</string>
+    <string name="keepawake_quick_settings">Hızlı Ayarlar Kartosu</string>
+    <string name="keepawake_quick_settings_desc">Bildirim paneline kartosu ekle</string>
+    <string name="keepawake_minutes_format">%1$d dk</string>
+    <string name="keepawake_selected_apps_count">%1$d uygulama seçildi</string>
+    <string name="keepawake_select_apps">Uygulamaları seç</string>
+    <string name="keepawake_permissions_title">İzinler</string>
+    <string name="settings">Ayarlar</string>
+
+    <!-- Notification -->
+    <string name="keepawake_channel_name">Ekranı Açık Tut</string>
+    <string name="keepawake_channel_desc">Ekranın kapanmasını engelleme durumu</string>
+    <string name="keepawake_notification_title">Ekran Açık Tutuluyor</string>
+    <string name="keepawake_notification_timer">Kalan süre: %1$s</string>
+    <string name="keepawake_notification_manual">Dokunarak kapatabilirsiniz</string>
+    <string name="keepawake_notification_infinite">Manuel kapatılana kadar açık kalır</string>
+    <string name="keepawake_notification_app_active">Seçili uygulamada ekran açık</string>
+    <string name="keepawake_notification_app_waiting">Seçili uygulama bekleniyor</string>
+    <string name="keepawake_notification_generic">Ekran açık tutma servisi çalışıyor</string>
+
+    <!-- Status -->
+    <string name="screen_kept_awake">Ekran Açık Tutuluyor</string>
+    <string name="screen_normal">Ekran Normal</string>
+    <string name="keep_awake_now">Ekranı Açık Tut</string>
+    <string name="stop_keeping_awake">Durdur</string>
+    <string name="overlay_permission_required">Overlay izni gerekli</string>
+
+    <!-- Permissions -->
+    <string name="permission_system_alert_window_title">Diğer Uygulamaların Üzerine Çizme</string>
+    <string name="permission_system_alert_window_desc">Ekranı açık tutmak için overlay penceresi oluşturmak için</string>
+    <string name="permission_wake_lock_title">Uyku Kilidi</string>
+    <string name="permission_wake_lock_desc">Ekranın kapanmasını engellemek için</string>
+    <string name="permission_usage_stats_title">Kullanım İstatistikleri</string>
+    <string name="permission_usage_stats_desc">Ön plandaki uygulamayı tespit etmek için (uygulama bazlı mod)</string>
+    <string name="permission_foreground_service_title">Ön Plan Servisi</string>
+    <string name="permission_foreground_service_desc">Bildirimde durum gösterimi için</string>
+    <string name="permission_post_notifications_title">Bildirim İzni</string>
+    <string name="permission_post_notifications_desc">Ekran açık tutulurken durumu bildirmek için (Android 13+)</string>
+    <string name="usage_stats_permission_needed">Kullanım istatistikleri izni gerekli</string>
+    <string name="open_overlay_settings">Ayarları Aç</string>
+
+    <!-- Explanations -->
+    <string name="overlay_permission_explanation_title">Diğer Uygulamaların Üzerine Çizme İzni</string>
+    <string name="overlay_permission_explanation_text">Ekranı açık tutmak için küçük, görünmez bir overlay penceresi oluşturuyoruz. Bu pencere FLAG_KEEP_SCREEN_ON bayrağını taşıyor ve ekranın kapanmasını engelliyor.\n\nBu yöntem:\n• Pil tüketimi çok düşük (sadece bir pencere tutucu)\n• Kök (root) izni gerektirmez\n• Android 6.0+ (API 23+) da çalışır\n• Sistem ayarlarından izin verilmeli\n\nİzni vermek için \"Ayarları Aç\" butonuna basın.</string>
+    <string name="usage_stats_explanation_title">Kullanım İstatistikleri İzni Gerekli</string>
+    <string name="usage_stats_explanation_text">Uygulama bazlı mod için, hangi uygulamanın ön planda olduğunu bilmemiz gerekiyor. Bu için Android\"in \"Kullanım İstatistiklerine Erişim\" izni gerekir.\n\nBu izin:\n• Hangi uygulamanın ön planda olduğunu tespit etmemizi sağlar\n• Sadece uygulama adı bilgisi alınır, kişisel veri toplanmaz\n• İzin verildikten sonra seçtiğiniz uygulamalarda ekran açık kalır\n\nİzni vermek için \"Ayarları Aç\" butonuna basın, listeden Toolbox veya eklentiyi bulun ve izni etkinleştirin.</string>
+    <string name="open_usage_stats_settings">Ayarları Aç</string>
+
+    <!-- Info -->
+    <string name="about_this_plugin">Bu Eklenti Hakkında</string>
+    <string name="keepawake_info_text">Bu eklenti Android\"in SYSTEM_ALERT_WINDOW iznini kullanarak 1x1 piksel boyutunda şeffaf bir overlay penceresi oluşturur. Bu pencere FLAG_KEEP_SCREEN_ON bayrağı ile oluşturulduğu için ekranın kapanmasını engeller. Pil tüketimi minimumdur çünkü sadece pencere tutucu olarak çalışır, sürekli CPU kullanmaz.\n\nUygulama bazlı mod için \"Kullanım İstatistiklerine Erişim\" izni gerekir. Bu izin ile hangi uygulamanın ön planda olduğunu tespit edip, seçtiğiniz uygulamalarda ekranı açık tutarız.</string>
+
+    <!-- Actions -->
+    <string name="back">Geri</string>
+    <string name="reset">Sıfırla</string>
+</resources>

@@ -1,0 +1,24 @@
+# Gradle
+.gradle/
+**/build/
+
+# Local configuration
+local.properties
+*.iml
+.idea/
+.DS_Store
+
+# Kotlin/Android
+.kotlin/
+.cxx/
+captures/
+.externalNativeBuild/
+
+# Logs and misc
+*.log
+lint_output.txt
+
+# Keystores (do not commit)
+*.jks
+*.keystore
+keystore.properties

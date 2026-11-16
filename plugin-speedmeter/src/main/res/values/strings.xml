@@ -1,0 +1,78 @@
+<resources>
+    <!-- Plugin Info -->
+    <string name="plugin_speedmeter_name">İnternet Hızı Göstergesi</string>
+    <string name="plugin_speedmeter_desc">Durum çubuğunda anlık indirme/yükleme hızı, günlük/aylık veri kullanımı gösterir.</string>
+    <string name="plugin_speedmeter_short">Hız Göstergesi</string>
+
+    <!-- Settings -->
+    <string name="speedmeter_settings_title">İnternet Hızı Ayarları</string>
+    <string name="notification_settings">Bildirim Ayarları</string>
+    <string name="network_settings">Ağ Ayarları</string>
+    <string name="display_settings">Görünüm Ayarları</string>
+    <string name="general_settings">Genel Ayarlar</string>
+    <string name="about_this_plugin">Bu Eklenti Hakkında</string>
+
+    <!-- Notification -->
+    <string name="speedmeter_show_notification">Bildirim Göster</string>
+    <string name="speedmeter_show_notification_desc">Durum çubuğunda anlık hızı göster</string>
+    <string name="speedmeter_show_upload">Yükleme Hızı Göster</string>
+    <string name="speedmeter_show_upload_desc">Bildirime yükleme hızını da ekle</string>
+
+    <!-- Network -->
+    <string name="speedmeter_network_mode">Ağ Modu</string>
+    <string name="speedmeter_network_mode_desc">Hangi arayüzlerin ölçüleceği</string>
+    <string name="speedmeter_network_mode_total">Toplam (Wi-Fi + Mobil)</string>
+    <string name="speedmeter_network_mode_wifi">Sadece Wi-Fi</string>
+    <string name="speedmeter_network_mode_mobile">Sadece Mobil Veri</string>
+
+    <!-- Display -->
+    <string name="speedmeter_unit">Birim</string>
+    <string name="speedmeter_unit_desc">Hız birimi seçimi</string>
+    <string name="speedmeter_unit_auto">Otomatik (KB/s / MB/s)</string>
+    <string name="speedmeter_unit_kbps">KB/s</string>
+    <string name="speedmeter_unit_mbps">MB/s</string>
+
+    <!-- General -->
+    <string name="speedmeter_autostart">Açılışta Başlat</string>
+    <string name="speedmeter_autostart_desc">Cihaz açıldığında servisi otomatik başlat</string>
+    <string name="reset_stats">İstatistikleri Sıfırla</string>
+    <string name="reset_stats_desc">Günlük ve aylık veri sayaçlarını sıfırla</string>
+    <string name="reset">Sıfırla</string>
+
+    <!-- Speeds -->
+    <string name="download_speed">İndirme</string>
+    <string name="upload_speed">Yükleme</string>
+    <string name="data_usage">Veri Kullanımı</string>
+    <string name="daily_usage">Günlük</string>
+    <string name="monthly_usage">Aylık</string>
+    <string name="service_running">Servis çalışıyor</string>
+    <string name="service_stopped">Servis durdu</string>
+
+    <!-- Info -->
+    <string name="speedmeter_info_title">Bilgi</string>
+    <string name="speedmeter_info_text">Bu eklenti Android\"in TrafficStats API\"sini kullanarak saniyede bir ağ trafiğini ölçer. Veriler cihazınızda kalır, hiçbir sunucuya gönderilmez. Pil tüketimini minimize etmek için hesaplamalar optimize edilmiştir.</string>
+
+    <!-- Permissions -->
+    <string name="permission_foreground_service_title">Ön Plan Servisi</string>
+    <string name="permission_foreground_service_desc">Bildirimde hız gösterimi için sürekli çalışması gerekir</string>
+    <string name="permission_foreground_data_sync_title">Veri Senkronizasyonu</string>
+    <string name="permission_foreground_data_sync_desc">Arka planda veri kullanımını ölçmek için</string>
+    <string name="permission_network_title">Ağ Erişimi</string>
+    <string name="permission_network_desc">TrafficStats ile veri kullanımını okumak için</string>
+    <string name="permission_receive_boot_title">Önyükleme Tamamlandı</string>
+    <string name="permission_receive_boot_desc">Cihaz açılışında servisi otomatik başlatmak için</string>
+    <string name="permission_post_notifications_title">Bildirim İzni</string>
+    <string name="permission_post_notifications_desc">Anlık hız bildirimi göstermek için (Android 13+)</string>
+
+    <!-- Service / notification -->
+    <string name="service_start">Ölçümü Başlat</string>
+    <string name="stop_service">Durdur</string>
+    <string name="speedmeter_channel_name">İnternet Hızı Göstergesi</string>
+    <string name="speedmeter_channel_desc">Anlık indirme ve yükleme hızını gösterir</string>
+    <string name="speedmeter_notification_download">↓ %1$s</string>
+    <string name="speedmeter_notification_upload">↑ %1$s</string>
+    <string name="speedmeter_notification_both">↓ %1$s   ↑ %2$s</string>
+    <string name="speedmeter_notification_big">Günlük: %1$s • Aylık: %2$s</string>
+    <string name="speedmeter_notification_measuring">Hız ölçümü çalışıyor</string>
+    <string name="back">Geri</string>
+</resources>

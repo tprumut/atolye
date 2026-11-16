@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
+        tools:targetApi="34" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/plugin_sessecici_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SesSecici"
+        tools:targetApi="34">
+
+        <activity
+            android:name=".SesSeciciPluginActivity"
+            android:exported="true"
+            android:label="@string/plugin_sessecici_name"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.SesSecici">
+            <intent-filter>
+                <action android:name="com.toolbox.PLUGIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="com.toolbox.plugin.METADATA"
+                android:resource="@xml/plugin_metadata" />
+        </activity>
+
+        <activity
+            android:name=".SesSeciciSettingsActivity"
+            android:exported="true"
+            android:label="@string/sessecici_settings_title"
+            android:parentActivityName=".SesSeciciPluginActivity"
+            android:theme="@style/Theme.SesSecici" />
+
+        <service
+            android:name=".SesSeciciDeviceService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse"
+            android:stopWithTask="false">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Monitor audio device changes and apply saved volume/routing preferences" />
+        </service>
+
+        <service
+            android:name=".SesSeciciTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_notification_sessecici"
+            android:label="@string/plugin_sessecici_name"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name=".SesSeciciBootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".SesSeciciActionReceiver"
+            android:exported="false" />
+
+    </application>
+
+    <queries>
+        <package android:name="com.atolye.host" />
+        <package android:name="com.atolye.host.debug" />
+    </queries>
+
+</manifest>

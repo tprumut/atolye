@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="keepawake_primary">#FF9800</color>
+    <color name="keepawake_primary_container">#E65100</color>
+    <color name="keepawake_secondary">#4CAF50</color>
+    <color name="keepawake_secondary_container">#1B5E20</color>
+    <color name="keepawake_tertiary">#2196F3</color>
+    <color name="keepawake_tertiary_container">#0D47A1</color>
+</resources>

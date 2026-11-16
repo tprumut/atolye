@@ -1,0 +1,56 @@
+<resources>
+    <string name="plugin_uykucu_name">Uykucu</string>
+    <string name="plugin_uykucu_desc">Süre dolunca medyayı durdurur, uygulamaları kapatmayı dener ve ekranı kilitler.</string>
+
+    <string name="uykucu_settings_title">Uykucu Ayarları</string>
+    <string name="uykucu_select_duration">Süre Seçin</string>
+    <string name="uykucu_custom_duration">Özel süre (dakika)</string>
+    <string name="uykucu_start">Başlat</string>
+    <string name="uykucu_cancel">İptal</string>
+    <string name="uykucu_extend_5">+5 Dakika Uzat</string>
+    <string name="uykucu_remaining">Kalan süre</string>
+    <string name="uykucu_running">Geri sayım sürüyor</string>
+    <string name="uykucu_not_running">Hazır</string>
+    <string name="uykucu_minutes_short">%1$d dk</string>
+
+    <string name="uykucu_channel_name">Uykucu Zamanlayıcı</string>
+    <string name="uykucu_channel_desc">Uyku zamanlayıcısı geri sayım ve uyarıları</string>
+    <string name="uykucu_notification_title">Uykucu çalışıyor</string>
+    <string name="uykucu_notification_remaining">Kalan süre: %1$s</string>
+    <string name="uykucu_warning_title">Uykucu: 30 saniye kaldı</string>
+    <string name="uykucu_warning_text">Süre dolmak üzere. Cihaz birazdan uyku moduna alınacak.</string>
+
+    <string name="settings">Ayarlar</string>
+    <string name="back">Geri</string>
+    <string name="open_settings">Ayarları Aç</string>
+    <string name="grant_permission">İzin Ver</string>
+    <string name="permission_granted">Verildi</string>
+    <string name="permission_required">Gerekli</string>
+
+    <string name="uykucu_close_apps">Uygulamaları kapatmayı dene</string>
+    <string name="uykucu_close_apps_desc">Süre dolunca ana ekrana dönüp son uygulamalarda \"Tümünü temizle\" denemesi yapar (cihaza göre değişebilir).</string>
+    <string name="uykucu_stop_media">Medyayı durdur</string>
+    <string name="uykucu_stop_media_desc">Çalan medyayı durdurmak için medya tuşu ve ses odağı kullanır.</string>
+    <string name="uykucu_remember_last">Son kullanılan süreyi hatırla</string>
+    <string name="uykucu_remember_last_desc">Bir sonraki açılışta son seçilen süreyi önerir.</string>
+
+    <string name="uykucu_permissions_title">İzinler ve Erişim</string>
+    <string name="permission_accessibility_title">Erişilebilirlik Servisi</string>
+    <string name="permission_accessibility_desc">Ekranı kilitlemek ve uygulamaları kapatma adımlarını denemek için gereklidir.</string>
+    <string name="permission_foreground_service_title">Ön Plan Servisi</string>
+    <string name="permission_foreground_service_desc">Geri sayımın arka planda güvenilir çalışması için gereklidir.</string>
+    <string name="permission_post_notifications_title">Bildirim İzni</string>
+    <string name="permission_post_notifications_desc">Kalan süre ve uyarı bildirimlerini göstermek için (Android 13+).</string>
+    <string name="permission_exact_alarm_title">Kesin Alarm İzni</string>
+    <string name="permission_exact_alarm_desc">Ekran kapalıyken bile sürenin doğru bitmesi için gereklidir.</string>
+
+    <string name="accessibility_service_description">Uykucu, süre dolduğunda ekranı kilitlemek (GLOBAL_ACTION_LOCK_SCREEN) ve isteğe bağlı olarak uygulamaları kapatma adımlarını denemek için erişilebilirlik servisini kullanır. Hiçbir veri toplanmaz veya paylaşılmaz.</string>
+    <string name="accessibility_permission_explanation_title">Erişilebilirlik İzni Gerekli</string>
+    <string name="accessibility_permission_explanation_text">Ekranı kapatmak ve cihazı uyku moduna almak için Android\'in erişilebilirlik servisi üzerinden GLOBAL_ACTION_LOCK_SCREEN eylemini çağırmamız gerekir.\n\nBu izin ayrıca, etkinleştirirseniz, uygulamaları kapatma denemesi için ana ekran/son uygulamalar adımlarını gerçekleştirmemize izin verir.\n\nUykucu internete bağlanmaz, reklam ve izleme içermez; bu izin yalnızca zamanlayıcı dolduğunda belirtilen işlemler için kullanılır.\n\nAçmak için Ayarlar\'a gidin, Uykucu\'yu bulun ve erişilebilirlik servisini etkinleştirin.</string>
+    <string name="exact_alarm_permission_explanation_title">Kesin Alarm İzni</string>
+    <string name="exact_alarm_permission_explanation_text">Geri sayım ekran kapalıyken de doğru çalışmalı. Bunun için kesin alarm planlaması gerekir. İzni vermek için sistem ayarlarından Uykucu için \"Alarmlar ve hatırlatıcılar\" iznini etkinleştirin.</string>
+
+    <string name="uykucu_accessibility_missing">Erişilebilirlik servisi etkin değil. Süre dolduğunda ekran kilitlenemeyebilir.</string>
+    <string name="uykucu_exact_alarm_missing">Kesin alarm izni verilmedi. Zamanlayıcı gecikebilir.</string>
+    <string name="uykucu_notification_permission_missing">Bildirim izni verilmedi (Android 13+).</string>
+</resources>

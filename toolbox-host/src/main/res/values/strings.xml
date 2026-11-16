@@ -1,0 +1,71 @@
+<resources>
+    <string name="app_name">Atölye</string>
+    <string name="app_tagline">Araçlarını tek yerde topla</string>
+
+    <!-- Main screen -->
+    <string name="plugins_title">Eklentiler</string>
+    <string name="plugins_subtitle">Kurulu araçların ve durumları</string>
+    <string name="installed_plugins_count">%1$d eklenti</string>
+    <string name="welcome_title">Atölyeye hoş geldin</string>
+    <string name="welcome_description">Atölye, küçük ve odaklı araçları tek bir yerden yönetmeni sağlar. Başlamak için bir eklenti kur.</string>
+    <string name="no_plugins_installed">Henüz eklenti yok</string>
+    <string name="no_plugins_description">Eklentiler ayrı APK dosyaları olarak kurulur. Kurduğun araçlar burada görünür.</string>
+    <string name="discover_plugins">Eklenti kur</string>
+    <string name="add_plugin">Eklenti ekle</string>
+    <string name="add_plugin_desc">Yeni bir eklenti kur</string>
+    <string name="add_plugin_desc_short">Ayrı APK olarak yükle</string>
+    <string name="add_plugin_dialog_title">Eklenti nasıl kurulur?</string>
+    <string name="add_plugin_dialog_text">Atölye eklentileri ayrı APK dosyalarıdır. Eklenti APK dosyasını F-Droid veya projenin sürüm sayfasından indirip cihazına kur. Kurulum tamamlandığında eklenti bu listede otomatik olarak görünür.</string>
+
+    <!-- Plugin states -->
+    <string name="plugin_running">Çalışıyor</string>
+    <string name="plugin_stopped">Hazır</string>
+    <string name="plugin_disabled">Devre dışı</string>
+    <string name="plugin_enabled">Etkin</string>
+    <string name="enable_plugin">Eklentiyi etkinleştir</string>
+    <string name="open_plugin">Eklentiyi aç</string>
+    <string name="plugin_open">Aç</string>
+    <string name="plugin_settings">Eklenti ayarları</string>
+    <string name="open_settings">Ayarlar</string>
+    <string name="launch_failed">Eklenti açılamadı</string>
+    <string name="settings_unavailable">Bu eklentinin ayar ekranı yok</string>
+
+    <!-- Detail -->
+    <string name="plugin_details">Eklenti ayrıntıları</string>
+    <string name="about">Hakkında</string>
+    <string name="required_permissions">İstenen izinler</string>
+    <string name="no_permissions">Bu eklenti özel bir izin istemiyor.</string>
+    <string name="version_format">Sürüm %1$d</string>
+    <string name="version_unknown">Sürüm bilinmiyor</string>
+    <string name="installed_version_format">Kurulu sürüm kodu: %1$d</string>
+    <string name="permission_required">Zorunlu</string>
+    <string name="permission_optional">İsteğe bağlı</string>
+
+    <!-- Categories -->
+    <string name="category_tools">Araçlar</string>
+    <string name="category_network">Ağ</string>
+    <string name="category_display">Ekran</string>
+    <string name="category_system">Sistem</string>
+    <string name="category_developer">Geliştirici</string>
+    <string name="category_media">Medya</string>
+    <string name="category_productivity">Verimlilik</string>
+
+    <!-- Actions / chrome -->
+    <string name="back">Geri</string>
+    <string name="refresh">Yenile</string>
+    <string name="change_theme">Tema değiştir</string>
+    <string name="more_options">Diğer seçenekler</string>
+    <string name="retry">Tekrar dene</string>
+    <string name="close">Kapat</string>
+    <string name="ok">Tamam</string>
+    <string name="cancel">Vazgeç</string>
+    <string name="error_prefix">Hata: %1$s</string>
+
+    <!-- Theme dialog -->
+    <string name="theme_dialog_title">Tema seç</string>
+    <string name="theme_kagit">Kâğıt</string>
+    <string name="theme_gece">Gece Atölyesi</string>
+    <string name="theme_bakir">Bakır</string>
+    <string name="theme_devre">Devre Kartı</string>
+    <string name="theme_dynamic">Dinamik (Sistem)</string>
+</resources>

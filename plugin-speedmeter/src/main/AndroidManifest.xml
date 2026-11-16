@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"
+        tools:targetApi="34" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/plugin_speedmeter_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SpeedMeter"
+        tools:targetApi="31">
+
+        <!-- Main Plugin Activity -->
+        <activity
+            android:name=".SpeedMeterPluginActivity"
+            android:exported="true"
+            android:label="@string/plugin_speedmeter_name"
+            android:theme="@style/Theme.SpeedMeter"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="com.toolbox.PLUGIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <!-- Plugin metadata -->
+            <meta-data
+                android:name="com.toolbox.plugin.METADATA"
+                android:resource="@xml/plugin_metadata" />
+        </activity>
+
+        <!-- Settings Activity -->
+        <activity
+            android:name=".SpeedMeterSettingsActivity"
+            android:exported="true"
+            android:label="@string/speedmeter_settings_title"
+            android:theme="@style/Theme.SpeedMeter"
+            android:parentActivityName=".SpeedMeterPluginActivity" />
+
+        <!-- Foreground Service -->
+        <service
+            android:name=".SpeedMeterService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:stopWithTask="false" />
+
+        <!-- Boot Receiver -->
+        <receiver
+            android:name=".SpeedMeterBootReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+    <!-- Query for host app -->
+    <queries>
+        <package android:name="com.atolye.host" />
+        <package android:name="com.atolye.host.debug" />
+    </queries>
+
+</manifest>

@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.SesSecici" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/sessecici_primary</item>
+        <item name="colorPrimaryDark">@color/sessecici_primary_container</item>
+        <item name="colorAccent">@color/sessecici_secondary</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>

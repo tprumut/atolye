@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="toolbox_primary">#1976D2</color>
+    <color name="toolbox_primary_container">#BBDEFB</color>
+    <color name="toolbox_secondary">#388E3C</color>
+    <color name="toolbox_secondary_container">#C8E6C9</color>
+    <color name="toolbox_tertiary">#F57C00</color>
+    <color name="toolbox_tertiary_container">#FFE0B2</color>
+</resources>

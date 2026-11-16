@@ -1,0 +1,55 @@
+<resources>
+    <string name="plugin_sessecici_name">Ses Seçici</string>
+    <string name="plugin_sessecici_desc">Ses çıkış cihazlarını yönetin, cihaz başına ses hatırlayın ve çıkışlar arasında geçiş yapın.</string>
+
+    <string name="sessecici_settings_title">Ses Seçici Ayarları</string>
+
+    <string name="section_outputs">Çıkış Cihazları</string>
+    <string name="section_outputs_desc">Bağlı ses çıkışlarını listeler. Tek dokunuşla geçiş yapmayı dener ve cihaz başına medya sesini hatırlar.</string>
+    <string name="section_app_audio">Uygulama Bazlı Ses (Deneysel)</string>
+    <string name="section_app_audio_desc">Aktif ses çalan uygulamalar için ayrı seviye denemesi. Cihaz/Android sürümüne göre desteklenmeyebilir; desteklenmezse devre dışı kalır.</string>
+    <string name="section_settings">Ayarlar</string>
+    <string name="section_settings_desc">Cihaz hatırlama, bildirim ve deneysel özellik davranışları.</string>
+
+    <string name="remember_device">Bu cihazı hatırla</string>
+    <string name="remember_device_desc">Cihaz bağlandığında kayıtlı medya sesi otomatik uygulanır.</string>
+    <string name="apply_now">Şimdi uygula</string>
+    <string name="active_output">Etkin/tercih edilen çıkış</string>
+    <string name="no_devices">Bağlı çıkış cihazı bulunamadı.</string>
+    <string name="switch_unsupported">Bu cihaz/sürümde çıkış geçişi desteklenmiyor veya kısıtlı.</string>
+    <string name="switch_hint_api31">Android 12+ için iletişim cihazı yönlendirmesi denenir; medya çıkışı bazı cihazlarda sistem tarafından yönetilir.</string>
+    <string name="switch_hint_legacy">Eski Android sürümlerinde yönlendirme sınırlı olabilir; mümkün olan en yakın yöntem denenir.</string>
+
+    <string name="app_audio_experimental">Deneysel özellik</string>
+    <string name="app_audio_unsupported">Uygulama bazlı ses bu cihazda veya Android sürümünde desteklenmiyor. Özellik güvenli şekilde devre dışı.</string>
+    <string name="app_audio_no_apps">Şu anda ses çalan uygulama algılanmadı.</string>
+    <string name="app_audio_limited">Sistem kısıtlamaları nedeniyle bazı uygulamalar listelenmeyebilir veya ses seviyesi değiştirilemeyebilir.</string>
+
+    <string name="notification_enabled">Kalıcı bildirim göster</string>
+    <string name="notification_enabled_desc">Çıkış seçimi ve durum için kalıcı bildirim (ve hızlı ayarlar kutucuğu desteği).</string>
+    <string name="auto_apply_on_connect">Bağlanınca otomatik uygula</string>
+    <string name="auto_apply_on_connect_desc">Hatırlanan cihaz bağlandığında kayıtlı ses seviyesi uygulanır.</string>
+
+    <string name="notification_channel_name">Ses Seçici</string>
+    <string name="notification_channel_desc">Ses çıkış durumu ve hızlı geçiş</string>
+    <string name="notification_title">Ses çıkışı</string>
+    <string name="notification_text">Etkin: %1$s</string>
+
+    <string name="permission_modify_audio_title">Ses Ayarlarını Değiştirme</string>
+    <string name="permission_modify_audio_desc">Ses seviyesi ve çıkış yönlendirmesini yönetmek için gereklidir.</string>
+    <string name="permission_post_notifications_title">Bildirim İzni</string>
+    <string name="permission_post_notifications_desc">Kalıcı bildirim ve hızlı geçiş için (Android 13+).</string>
+    <string name="permission_bluetooth_connect_title">Bluetooth Bağlantı İzni</string>
+    <string name="permission_bluetooth_connect_desc">Bluetooth ses cihazlarının adını/türünü doğru göstermek için (Android 12+).</string>
+
+    <string name="device_speaker">Tablet Hoparlörü</string>
+    <string name="device_wired">Kablolu Kulaklık</string>
+    <string name="device_bluetooth">Bluetooth</string>
+    <string name="device_usb">USB Ses</string>
+    <string name="device_other">Diğer</string>
+
+    <string name="back">Geri</string>
+    <string name="settings">Ayarlar</string>
+    <string name="open_settings">Ayarları Aç</string>
+    <string name="refresh">Yenile</string>
+</resources>
