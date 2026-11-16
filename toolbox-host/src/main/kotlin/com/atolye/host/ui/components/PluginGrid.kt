@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
@@ -42,8 +41,8 @@ fun PluginGrid(
     onPowerClick: (PluginUiItem) -> Unit,
     onHideToggle: (PluginUiItem) -> Unit,
     onEditCard: (PluginUiItem) -> Unit,
+    onDeleteClick: (PluginUiItem) -> Unit,
     onQuickSettingChange: (PluginUiItem, String, String) -> Unit,
-    onAddPluginClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
@@ -66,11 +65,9 @@ fun PluginGrid(
                     onPowerClick = { onPowerClick(item) },
                     onHideToggle = { onHideToggle(item) },
                     onEditCard = { onEditCard(item) },
+                    onDeleteClick = { onDeleteClick(item) },
                     onQuickSettingChange = { k, v -> onQuickSettingChange(item, k, v) }
                 )
-            }
-            item(key = "add_plugin", span = { GridItemSpan(maxLineSpan) }) {
-                AddPluginCard(onClick = onAddPluginClick, modifier = Modifier.padding(top = 4.dp))
             }
         }
     }

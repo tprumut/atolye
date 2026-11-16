@@ -30,6 +30,14 @@ class AtolyeApplication : Application() {
 
     val theme: StateFlow<AtolyeThemeType> = _theme.asStateFlow()
 
+    // Tema geçiş sırası (DYNAMIC hariç, kullanıcı isteği üzerine eklenebilir)
+    private val themeCycleOrder = listOf(
+        AtolyeThemeType.KAGIT,
+        AtolyeThemeType.GECE_ATOLYESI,
+        AtolyeThemeType.BAKIR,
+        AtolyeThemeType.DEVRE_KARTI
+    )
+
     override fun onCreate() {
         super.onCreate()
         _theme.value = loadTheme()
@@ -38,6 +46,19 @@ class AtolyeApplication : Application() {
     fun setTheme(themeType: AtolyeThemeType) {
         hostPreferences.edit().putString(KEY_THEME, themeType.name).apply()
         _theme.value = themeType
+    }
+
+    /**
+     * Mevcut temadan bir sonrakine geçer (döngüsel).
+     * Palet butonuna her basışta çağrılır.
+     */
+    fun cycleTheme(): AtolyeThemeType {
+        val current = _theme.value
+        val currentIndex = themeCycleOrder.indexOf(current)
+        val nextIndex = if (currentIndex >= 0) (currentIndex + 1) % themeCycleOrder.size else 0
+        val nextTheme = themeCycleOrder[nextIndex]
+        setTheme(nextTheme)
+        return nextTheme
     }
 
     private fun loadTheme(): AtolyeThemeType {

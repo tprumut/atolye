@@ -25,6 +25,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -43,6 +44,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -76,8 +78,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.atolye.design.AtolyeAppLogo
 import com.atolye.design.AtolyePluginIcon
 import com.atolye.design.AtolyeShapes
-import com.atolye.design.AtolyeThemeSelector
 import com.atolye.design.AtolyeThemeType
+import com.atolye.host.AtolyeApplication
 import com.atolye.host.R
 import com.atolye.host.ui.components.EmptyPluginsState
 import com.atolye.host.ui.components.LoadingGrid
@@ -112,11 +114,13 @@ fun MainScreen(
     val error by viewModel.error.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
-    var showThemeDialog by remember { mutableStateOf(false) }
     var showAddDialog by remember { mutableStateOf(false) }
     var showHidden by remember { mutableStateOf(false) }
     var editItem by remember { mutableStateOf<PluginUiItem?>(null) }
     var pendingStartItem by remember { mutableStateOf<PluginUiItem?>(null) }
+
+    // AtolyeApplication instance for cycleTheme
+    val app = context.applicationContext as AtolyeApplication
 
     OnResume { viewModel.requestStates() }
 
@@ -139,6 +143,22 @@ fun MainScreen(
         }
     }
 
+    // Tema değişikliğinde snackbar göster
+    val currentTheme by app.theme.collectAsState()
+    // Tema isimlerini compose dışında çözmek için context kullan
+    val themeName = remember(currentTheme) {
+        when (currentTheme) {
+            AtolyeThemeType.KAGIT -> context.getString(R.string.theme_kagit)
+            AtolyeThemeType.GECE_ATOLYESI -> context.getString(R.string.theme_gece)
+            AtolyeThemeType.BAKIR -> context.getString(R.string.theme_bakir)
+            AtolyeThemeType.DEVRE_KARTI -> context.getString(R.string.theme_devre)
+            AtolyeThemeType.DYNAMIC -> context.getString(R.string.theme_dynamic)
+        }
+    }
+    LaunchedEffect(currentTheme) {
+        snackbarHostState.showSnackbar(message = "Tema: $themeName", duration = SnackbarDuration.Short)
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -150,14 +170,15 @@ fun MainScreen(
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            HexBackground(modifier = Modifier.matchParentSize(), tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f))
+            HexBackground(modifier = Modifier.matchParentSize(), tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f))
             Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
                 HeaderSection(
                     pluginCount = visibleItems.size,
                     hiddenCount = hiddenCount,
                     showHidden = showHidden,
                     onToggleHidden = { showHidden = !showHidden },
-                    onThemeClick = { showThemeDialog = true },
+                    onAddClick = { showAddDialog = true },
+                    onThemeClick = { app.cycleTheme() },
                     onRefreshClick = { viewModel.loadPlugins() }
                 )
 
@@ -165,7 +186,8 @@ fun MainScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 22.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         text = stringResource(R.string.plugins_title),
@@ -173,11 +195,17 @@ fun MainScreen(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
                     )
+                    Text(
+                        text = stringResource(R.string.installed_plugins_count, visibleItems.size),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
                 HorizontalDivider(
                     modifier = Modifier.padding(horizontal = 22.dp),
                     thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f)
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
                 )
                 Spacer(Modifier.height(6.dp))
 
@@ -190,8 +218,11 @@ fun MainScreen(
                         onPowerClick = { tryTogglePower(it) },
                         onHideToggle = { viewModel.setPluginHidden(it.plugin.metadata.pluginId, !it.hidden) },
                         onEditCard = { editItem = it },
+                        onDeleteClick = { item ->
+                            // TODO: Implement delete confirmation dialog and uninstall logic
+                            // viewModel.uninstallPlugin(item.plugin.packageName)
+                        },
                         onQuickSettingChange = { item, k, v -> viewModel.setQuickSetting(item, k, v) },
-                        onAddPluginClick = { showAddDialog = true },
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -199,9 +230,6 @@ fun MainScreen(
         }
     }
 
-    if (showThemeDialog) {
-        AtolyeThemeSelector(currentTheme = themeType, onThemeChange = onThemeChange, onDismiss = { showThemeDialog = false })
-    }
     if (showAddDialog) {
         AlertDialog(
             onDismissRequest = { showAddDialog = false },
@@ -247,6 +275,7 @@ private fun HeaderSection(
     hiddenCount: Int,
     showHidden: Boolean,
     onToggleHidden: () -> Unit,
+    onAddClick: () -> Unit,
     onThemeClick: () -> Unit,
     onRefreshClick: () -> Unit
 ) {
@@ -276,15 +305,8 @@ private fun HeaderSection(
             CircleActionButton(onClick = onRefreshClick, contentDescription = stringResource(R.string.refresh)) {
                 Icon(Icons.Default.Refresh, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             }
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surface)
-                    .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("$pluginCount", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+            CircleActionButton(onClick = onAddClick, contentDescription = "Eklenti ekle") {
+                Icon(Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             }
         }
     }
