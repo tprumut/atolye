@@ -8,10 +8,11 @@
     iconRes="@drawable/ic_uykucu"
     settingsActivity="com.toolbox.plugin.uykucu.UykucuSettingsActivity"
     mainActivity="com.toolbox.plugin.uykucu.UykucuPluginActivity"
+    commandReceiver="com.toolbox.plugin.uykucu.UykucuCommandReceiver"
     category="TOOLS"
     tags="uyku, zamanlayıcı, uyku zamanlayıcısı, sleep, timer, kilit"
     accentColor="#5C6BC0"
-    downloadUrl="https://github.com/toolbox/plugins/releases/latest/download/uykucu.apk"
+    downloadUrl="https://github.com/tprumut/atolye/releases/latest/download/plugin-uykucu-debug.apk"
     minSdk="26">
     <required-permissions>
         <permission
@@ -35,4 +36,9 @@
             descriptionRes="@string/permission_exact_alarm_desc"
             isRequired="true" />
     </required-permissions>
+    <quick-settings>
+        <quick-setting key="stop_media_enabled" titleRes="@string/uykucu_stop_media" type="toggle" defaultValue="true" />
+        <quick-setting key="close_apps_enabled" titleRes="@string/uykucu_close_apps" type="toggle" defaultValue="true" />
+        <quick-setting key="remember_last_duration" titleRes="@string/uykucu_remember_last" type="toggle" defaultValue="true" />
+    </quick-settings>
 </plugin-metadata>

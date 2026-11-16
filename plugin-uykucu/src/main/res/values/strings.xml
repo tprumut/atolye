@@ -53,4 +53,13 @@
     <string name="uykucu_accessibility_missing">Erişilebilirlik servisi etkin değil. Süre dolduğunda ekran kilitlenemeyebilir.</string>
     <string name="uykucu_exact_alarm_missing">Kesin alarm izni verilmedi. Zamanlayıcı gecikebilir.</string>
     <string name="uykucu_notification_permission_missing">Bildirim izni verilmedi (Android 13+).</string>
+
+    <!-- Reliable -->
+    <string name="reliable_section">Kararlı çalışma</string>
+    <string name="battery_opt_status">Pil optimizasyonu muafiyeti</string>
+    <string name="battery_opt_granted">Verildi</string>
+    <string name="battery_opt_not_granted">Verilmedi</string>
+    <string name="open_battery_settings">Muafiyet ayarını aç</string>
+    <string name="open_app_launch">Uygulama başlatma yönetimi</string>
+    <string name="open_app_info">Uygulama bilgisi</string>
 </resources>

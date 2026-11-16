@@ -51,12 +51,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-/**
- * Ana gezinme: eklenti listesi ve eklenti ayrıntısı.
- *
- * Navigasyon kütüphanesi kullanılmaz; seçili eklenti basit bir yerel
- * durumda tutulur ve geri tuşu [BackHandler] ile yakalanır.
- */
 @Composable
 private fun AtolyeApp(
     themeType: AtolyeThemeType,
@@ -64,49 +58,41 @@ private fun AtolyeApp(
 ) {
     val context = LocalContext.current
     val viewModel: MainViewModel = viewModel()
-    val plugins by viewModel.plugins.collectAsState()
+    val items by viewModel.items.collectAsState()
+    val app = context.applicationContext as AtolyeApplication
+    val discovery = app.pluginDiscovery
 
     var selectedPluginId by remember { mutableStateOf<String?>(null) }
+    val selectedItem = selectedPluginId?.let { id -> items.firstOrNull { it.plugin.metadata.pluginId == id } }
 
-    val selectedPlugin = selectedPluginId?.let { id ->
-        plugins.firstOrNull { it.metadata.pluginId == id }
-    }
-
-    if (selectedPlugin == null) {
-        if (selectedPluginId != null) {
-            // Eklenti kaldırılmış ya da yenilenirken kaybolmuş olabilir.
-            selectedPluginId = null
-        }
-
+    if (selectedItem == null) {
+        if (selectedPluginId != null) selectedPluginId = null
         MainScreen(
             themeType = themeType,
             onThemeChange = onThemeChange,
-            onPluginClick = { plugin ->
-                selectedPluginId = plugin.metadata.pluginId
-            },
+            onPluginClick = { item -> selectedPluginId = item.plugin.metadata.pluginId },
             viewModel = viewModel
         )
     } else {
         BackHandler { selectedPluginId = null }
-
         val launchFailed = stringResource(R.string.launch_failed)
         val settingsUnavailable = stringResource(R.string.settings_unavailable)
 
         PluginDetailScreen(
-            plugin = selectedPlugin,
+            item = selectedItem,
             onBack = { selectedPluginId = null },
             onLaunch = {
-                if (!viewModel.launchPlugin(selectedPlugin)) {
+                if (!discovery.launchPlugin(selectedItem.plugin, from = context)) {
                     Toast.makeText(context, launchFailed, Toast.LENGTH_SHORT).show()
                 }
             },
             onSettings = {
-                if (!viewModel.openPluginSettings(selectedPlugin)) {
+                if (!discovery.openPluginSettings(selectedItem.plugin, from = context)) {
                     Toast.makeText(context, settingsUnavailable, Toast.LENGTH_SHORT).show()
                 }
             },
-            onToggle = { enabled ->
-                viewModel.setPluginEnabled(selectedPlugin, enabled)
+            onPowerToggle = {
+                if (selectedItem.runtime.running) viewModel.sendStop(selectedItem) else viewModel.sendStart(selectedItem)
             }
         )
     }

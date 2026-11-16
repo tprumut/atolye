@@ -49,7 +49,7 @@ class UykucuPluginActivity : BasePluginActivity() {
             category = PluginCategory.TOOLS,
             tags = listOf("uyku", "zamanlayıcı", "timer", "sleep", "kilit"),
             accentColor = "#5C6BC0",
-            downloadUrl = "https://github.com/toolbox/plugins/releases/latest/download/uykucu.apk",
+            downloadUrl = "https://github.com/tprumut/atolye/releases/latest/download/plugin-uykucu-debug.apk",
             minSdk = 26
         )
     }

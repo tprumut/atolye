@@ -11,6 +11,12 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Host control channel -->
+    <permission
+        android:name="com.toolbox.permission.CONTROL_PLUGIN"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="com.toolbox.permission.CONTROL_PLUGIN" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -62,6 +68,16 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Host command receiver -->
+        <receiver
+            android:name=".SpeedMeterCommandReceiver"
+            android:exported="true"
+            android:permission="com.toolbox.permission.CONTROL_PLUGIN">
+            <intent-filter>
+                <action android:name="com.toolbox.PLUGIN_COMMAND" />
             </intent-filter>
         </receiver>
 

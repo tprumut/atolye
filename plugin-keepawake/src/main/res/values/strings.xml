@@ -1,8 +1,8 @@
 <resources>
     <!-- Plugin Info -->
-    <string name="plugin_keepawake_name">Ekranı Açık Tut</string>
-    <string name="plugin_keepawake_desc">Tek dokunuşla ekranın kapanmasını engeller, uygulama bazlı mod destekler.</string>
-    <string name="plugin_keepawake_short">Ekran Açık</string>
+    <string name="plugin_keepawake_name">Uyanık</string>
+    <string name="plugin_keepawake_desc">Ekranı uyanık tutar. Süreli, süresiz ve uygulama bazlı modları destekler.</string>
+    <string name="plugin_keepawake_short">Uyanık</string>
 
     <!-- Settings -->
     <string name="keepawake_settings_title">Ekranı Açık Tut Ayarları</string>
@@ -75,6 +75,23 @@
     <!-- Info -->
     <string name="about_this_plugin">Bu Eklenti Hakkında</string>
     <string name="keepawake_info_text">Bu eklenti Android\"in SYSTEM_ALERT_WINDOW iznini kullanarak 1x1 piksel boyutunda şeffaf bir overlay penceresi oluşturur. Bu pencere FLAG_KEEP_SCREEN_ON bayrağı ile oluşturulduğu için ekranın kapanmasını engeller. Pil tüketimi minimumdur çünkü sadece pencere tutucu olarak çalışır, sürekli CPU kullanmaz.\n\nUygulama bazlı mod için \"Kullanım İstatistiklerine Erişim\" izni gerekir. Bu izin ile hangi uygulamanın ön planda olduğunu tespit edip, seçtiğiniz uygulamalarda ekranı açık tutarız.</string>
+
+    <!-- Quick settings -->
+    <string name="qs_mode">Mod</string>
+    <string name="qs_mode_timed">Süreli</string>
+    <string name="qs_mode_infinite">Süresiz</string>
+    <string name="qs_mode_app">Uygulama</string>
+    <string name="qs_duration">Süre</string>
+    <string name="qs_notification">Bildirim</string>
+
+    <!-- Reliable -->
+    <string name="reliable_section">Kararlı çalışma</string>
+    <string name="battery_opt_status">Pil optimizasyonu muafiyeti</string>
+    <string name="battery_opt_granted">Verildi</string>
+    <string name="battery_opt_not_granted">Verilmedi</string>
+    <string name="open_battery_settings">Muafiyet ayarını aç</string>
+    <string name="open_app_launch">Uygulama başlatma yönetimi</string>
+    <string name="open_app_info">Uygulama bilgisi</string>
 
     <!-- Actions -->
     <string name="back">Geri</string>

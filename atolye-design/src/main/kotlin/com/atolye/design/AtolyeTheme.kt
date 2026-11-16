@@ -2,11 +2,15 @@ package com.atolye.design
 
 import android.content.Context
 import android.content.res.Configuration
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -22,8 +26,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -180,39 +185,64 @@ fun AtolyeThemeSelector(
     onDismiss: () -> Unit = {}
 ) {
     val themes = listOf(
-        AtolyeThemeType.KAGIT to "Kâğıt",
+        AtolyeThemeType.KAGIT to "Kâğıt Atölyesi",
         AtolyeThemeType.GECE_ATOLYESI to "Gece Atölyesi",
-        AtolyeThemeType.BAKIR to "Bakır",
+        AtolyeThemeType.BAKIR to "Bakır Tezgah",
         AtolyeThemeType.DEVRE_KARTI to "Devre Kartı",
         AtolyeThemeType.DYNAMIC to "Dinamik (Sistem)"
     )
+    val scrollState = rememberScrollState()
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Tema Seç") },
+        title = {
+            Text(
+                text = "Tema seç",
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
         text = {
             Column(
-                modifier = androidx.compose.ui.Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 420.dp)
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 themes.forEach { (type, name) ->
+                    val selected = currentTheme == type
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = name)
-                        RadioButton(
-                            selected = currentTheme == type,
-                            onClick = {
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(role = Role.RadioButton) {
                                 onThemeChange(type)
                                 onDismiss()
                             }
+                            .padding(horizontal = 4.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = selected,
+                            onClick = null
+                        )
+                        Text(
+                            text = name,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 12.dp),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            softWrap = true,
+                            maxLines = 2
                         )
                     }
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Tamam") } }
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Kapat")
+            }
+        }
     )
 }

@@ -60,7 +60,7 @@ class SpeedMeterPluginActivity : BasePluginActivity() {
             ),
             category = PluginCategory.NETWORK,
             tags = listOf("internet", "hız", "veri", "kullanım", "traffic"),
-            downloadUrl = "https://github.com/toolbox/plugins/releases/latest/download/speedmeter.apk",
+            downloadUrl = "https://github.com/tprumut/atolye/releases/latest/download/plugin-speedmeter-debug.apk",
             minSdk = 26
         )
     }

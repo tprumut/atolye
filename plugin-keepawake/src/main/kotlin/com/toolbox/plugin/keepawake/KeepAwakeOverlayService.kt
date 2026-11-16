@@ -24,15 +24,15 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.toolbox.contract.PluginContract
 import com.toolbox.plugin.PluginSettingsManager
+import com.toolbox.plugin.PluginStatusPublisher
 import java.util.concurrent.TimeUnit
 
 /**
- * Ekranı açık tutan ön plan servisi.
+ * Ekranı açık tutan ön plan servisi (Uyanık).
  *
  * Görünmez 1x1 piksel overlay penceresi `FLAG_KEEP_SCREEN_ON` taşır ve
- * ekranın kapanmasını engeller. Uygulama bazlı modda, kullanım
- * istatistikleriyle ön plandaki uygulama izlenir; yalnızca seçili
- * uygulamalar açıkken overlay etkinleştirilir.
+ * ekranın kapanmasını engeller. Modlar: süreli, süresiz, uygulama bazlı.
+ * Çalışırken ayar değişiklikleri servisi yeniden başlatmadan uygulanır.
  */
 class KeepAwakeOverlayService : Service() {
 
@@ -43,6 +43,7 @@ class KeepAwakeOverlayService : Service() {
         const val ACTION_START = "com.toolbox.plugin.keepawake.START"
         const val ACTION_STOP = "com.toolbox.plugin.keepawake.STOP"
         const val ACTION_TOGGLE = "com.toolbox.plugin.keepawake.TOGGLE"
+        const val ACTION_APPLY = "com.toolbox.plugin.keepawake.APPLY"
 
         const val EXTRA_MODE = "mode"
         const val EXTRA_DURATION = "duration"
@@ -63,6 +64,40 @@ class KeepAwakeOverlayService : Service() {
             val intent = Intent(context, KeepAwakeOverlayService::class.java)
                 .setAction(ACTION_TOGGLE)
             ContextCompat.startForegroundService(context, intent)
+        }
+
+        fun applySettings(context: Context) {
+            val intent = Intent(context, KeepAwakeOverlayService::class.java)
+                .setAction(ACTION_APPLY)
+            try {
+                context.startService(intent)
+            } catch (_: Exception) {
+            }
+        }
+
+        fun publishCurrentStatus(context: Context) {
+            val settings = PluginSettingsManager(context)
+            val running = settings.getBoolean(KeepAwakeKeys.PLUGIN_ID, KeepAwakeKeys.SERVICE_RUNNING, false)
+            val mode = settings.getInt(KeepAwakeKeys.PLUGIN_ID, KeepAwakeKeys.MODE, KeepAwakeKeys.MODE_TIMER)
+            val duration = settings.getInt(KeepAwakeKeys.PLUGIN_ID, KeepAwakeKeys.TIMER_DURATION, 15)
+            val showNotif = settings.getBoolean(KeepAwakeKeys.PLUGIN_ID, KeepAwakeKeys.SHOW_NOTIFICATION, true)
+            val end = settings.getLong(KeepAwakeKeys.PLUGIN_ID, "timer_end_time", 0L)
+            val remaining = if (running && mode == KeepAwakeKeys.MODE_TIMER && end > 0L) {
+                (end - System.currentTimeMillis()).coerceAtLeast(0L)
+            } else -1L
+            val qs = mapOf(
+                KeepAwakeKeys.MODE to mode.toString(),
+                KeepAwakeKeys.TIMER_DURATION to duration.toString(),
+                KeepAwakeKeys.SHOW_NOTIFICATION to showNotif.toString()
+            )
+            PluginStatusPublisher.publish(
+                context = context,
+                pluginId = KeepAwakeKeys.PLUGIN_ID,
+                running = running,
+                quickSettings = qs,
+                remainingMs = remaining,
+                statusText = null
+            )
         }
     }
 
@@ -85,14 +120,21 @@ class KeepAwakeOverlayService : Service() {
 
     private val timerTick = object : Runnable {
         override fun run() {
-            if (currentMode != KeepAwakeKeys.MODE_TIMER || timerEndTime <= 0L) return
-            val remaining = timerEndTime - System.currentTimeMillis()
-            if (remaining <= 0L) {
-                stopKeepingAwake()
-            } else {
-                updateNotification()
-                handler.postDelayed(this, 1000L)
+            if (!isRunning) return
+            if (currentMode == KeepAwakeKeys.MODE_TIMER) {
+                if (timerEndTime <= 0L) {
+                    stopKeepingAwake()
+                    return
+                }
+                val remaining = timerEndTime - System.currentTimeMillis()
+                if (remaining <= 0L) {
+                    stopKeepingAwake()
+                    return
+                }
             }
+            updateNotification()
+            publishStatus()
+            handler.postDelayed(this, 1000L)
         }
     }
 
@@ -100,6 +142,7 @@ class KeepAwakeOverlayService : Service() {
         override fun run() {
             if (!isRunning || currentMode != KeepAwakeKeys.MODE_APP_BASED) return
             evaluateForegroundApp()
+            publishStatus()
             handler.postDelayed(this, 2000L)
         }
     }
@@ -120,11 +163,27 @@ class KeepAwakeOverlayService : Service() {
             }
 
             ACTION_TOGGLE -> {
-                if (isRunning) stopKeepingAwake() else startKeepingAwake()
+                if (isRunning) stopKeepingAwake() else startKeepingAwakeFromPrefs()
+            }
+
+            ACTION_APPLY -> {
+                if (isRunning) {
+                    applyRuntimeSettings()
+                } else {
+                    publishStatus()
+                }
+            }
+
+            ACTION_START -> {
+                val mode = intent.getIntExtra(EXTRA_MODE, -1)
+                val dur = intent.getIntExtra(EXTRA_DURATION, -1)
+                if (mode >= 0) settings.putInt(KeepAwakeKeys.PLUGIN_ID, KeepAwakeKeys.MODE, mode)
+                if (dur > 0) settings.putInt(KeepAwakeKeys.PLUGIN_ID, KeepAwakeKeys.TIMER_DURATION, dur)
+                if (!isRunning) startKeepingAwake() else applyRuntimeSettings()
             }
 
             else -> {
-                if (!isRunning) startKeepingAwake()
+                if (!isRunning) startKeepingAwakeFromPrefs()
             }
         }
         return START_STICKY
@@ -138,8 +197,13 @@ class KeepAwakeOverlayService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     // ------------------------------------------------------------------
-    // Başlatma / durdurma
+    // Başlatma / durdurma / yeniden yapılandırma
     // ------------------------------------------------------------------
+
+    private fun startKeepingAwakeFromPrefs() {
+        loadSettings()
+        startKeepingAwake()
+    }
 
     private fun startKeepingAwake() {
         loadSettings()
@@ -161,35 +225,106 @@ class KeepAwakeOverlayService : Service() {
         handler.removeCallbacks(timerTick)
         handler.removeCallbacks(monitorTick)
 
+        configureForCurrentMode(resetTimer = true)
+
+        updateNotification()
+        publishStatus()
+    }
+
+    private fun configureForCurrentMode(resetTimer: Boolean) {
         when (currentMode) {
             KeepAwakeKeys.MODE_TIMER -> {
-                timerEndTime = System.currentTimeMillis() +
-                    TimeUnit.MINUTES.toMillis(timerDurationMinutes.toLong())
+                monitoringActive = false
+                if (resetTimer || timerEndTime <= 0L || timerEndTime < System.currentTimeMillis()) {
+                    timerEndTime = System.currentTimeMillis() +
+                        TimeUnit.MINUTES.toMillis(timerDurationMinutes.toLong())
+                    settings.putLong(KeepAwakeKeys.PLUGIN_ID, "timer_end_time", timerEndTime)
+                }
                 showOverlay()
                 handler.post(timerTick)
             }
 
             KeepAwakeKeys.MODE_APP_BASED -> {
+                timerEndTime = 0L
+                settings.putLong(KeepAwakeKeys.PLUGIN_ID, "timer_end_time", 0L)
                 monitoringActive = true
                 lastForegroundPackage = null
                 lastUsageQueryTime = 0L
                 evaluateForegroundApp()
+                handler.removeCallbacks(monitorTick)
                 handler.post(monitorTick)
+                // periyodik durum güncellemesi için timerTick'i de kullan
+                handler.removeCallbacks(timerTick)
+                handler.post(timerTick)
+            }
+
+            KeepAwakeKeys.MODE_INFINITE -> {
+                monitoringActive = false
+                timerEndTime = 0L
+                settings.putLong(KeepAwakeKeys.PLUGIN_ID, "timer_end_time", 0L)
+                showOverlay()
+                handler.removeCallbacks(timerTick)
+                handler.post(timerTick)
+            }
+
+            else -> { // MANUAL -> süresiz gibi davran
+                monitoringActive = false
+                timerEndTime = 0L
+                settings.putLong(KeepAwakeKeys.PLUGIN_ID, "timer_end_time", 0L)
+                showOverlay()
+                handler.removeCallbacks(timerTick)
+                handler.post(timerTick)
+            }
+        }
+    }
+
+    private fun applyRuntimeSettings() {
+        val prevMode = currentMode
+        val prevDuration = timerDurationMinutes
+        loadSettings()
+
+        // Bildirim görünürlüğü/ içeriği güncelle
+        updateNotification()
+
+        if (currentMode != prevMode) {
+            // Mod değişti: yeniden yapılandır (süreliğe geçişte süreyi sıfırdan başlat)
+            configureForCurrentMode(resetTimer = true)
+            publishStatus()
+            return
+        }
+
+        when (currentMode) {
+            KeepAwakeKeys.MODE_TIMER -> {
+                if (prevDuration != timerDurationMinutes) {
+                    // Süre değişti: kalan süreyi yeni süreye göre güncelle (çalışırken yeniden başlatmadan)
+                    val remaining = (timerEndTime - System.currentTimeMillis()).coerceAtLeast(0L)
+                    // Eğer henüz bitmediyse yeni süreyi şu andan itibaren uygula
+                    timerEndTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(timerDurationMinutes.toLong())
+                    settings.putLong(KeepAwakeKeys.PLUGIN_ID, "timer_end_time", timerEndTime)
+                }
+                if (overlayView == null) showOverlay()
+            }
+
+            KeepAwakeKeys.MODE_APP_BASED -> {
+                if (!KeepAwakePermissions.hasUsageStats(this)) {
+                    // izin yoksa güvenli durdur
+                    stopKeepingAwake()
+                    return
+                }
+                evaluateForegroundApp()
             }
 
             else -> {
-                showOverlay()
+                if (overlayView == null) showOverlay()
             }
         }
-
-        updateNotification()
-        broadcastStatus(true)
+        publishStatus()
     }
 
     private fun abortStart() {
         isRunning = false
         settings.putBoolean(KeepAwakeKeys.PLUGIN_ID, KeepAwakeKeys.SERVICE_RUNNING, false)
-        broadcastStatus(false)
+        publishStatus()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
@@ -208,8 +343,9 @@ class KeepAwakeOverlayService : Service() {
         timerEndTime = 0L
         if (::settings.isInitialized) {
             settings.putBoolean(KeepAwakeKeys.PLUGIN_ID, KeepAwakeKeys.SERVICE_RUNNING, false)
+            settings.putLong(KeepAwakeKeys.PLUGIN_ID, "timer_end_time", 0L)
         }
-        broadcastStatus(false)
+        publishStatus()
         if (foregroundStarted) {
             stopForeground(STOP_FOREGROUND_REMOVE)
             foregroundStarted = false
@@ -218,17 +354,9 @@ class KeepAwakeOverlayService : Service() {
 
     private fun loadSettings() {
         val pluginId = KeepAwakeKeys.PLUGIN_ID
-        currentMode = settings.getInt(pluginId, KeepAwakeKeys.MODE, KeepAwakeKeys.MODE_MANUAL)
-        timerDurationMinutes = settings.getInt(
-            pluginId,
-            KeepAwakeKeys.TIMER_DURATION,
-            15
-        )
-        showNotification = settings.getBoolean(
-            pluginId,
-            KeepAwakeKeys.SHOW_NOTIFICATION,
-            true
-        )
+        currentMode = settings.getInt(pluginId, KeepAwakeKeys.MODE, KeepAwakeKeys.MODE_TIMER)
+        timerDurationMinutes = settings.getInt(pluginId, KeepAwakeKeys.TIMER_DURATION, 15)
+        showNotification = settings.getBoolean(pluginId, KeepAwakeKeys.SHOW_NOTIFICATION, true)
     }
 
     // ------------------------------------------------------------------
@@ -257,14 +385,6 @@ class KeepAwakeOverlayService : Service() {
         }
     }
 
-    /**
-     * Son ön plana çıkan paketi döndürür.
-     *
-     * Kullanım olayları yalnızca son 15 saniyede değil, son sorgudan bu yana
-     * okunur; aksi halde seçili uygulama 15 saniyeden uzun süre açık kaldığında
-     * pencere kapanır. İlk sorguda son 10 dakika taranır ve son bilinen paket
-     * önbellekte tutulur.
-     */
     private fun foregroundPackage(): String? {
         if (!KeepAwakePermissions.hasUsageStats(this)) return null
 
@@ -422,7 +542,7 @@ class KeepAwakeOverlayService : Service() {
             !showNotification -> getString(R.string.keepawake_notification_generic)
             currentMode == KeepAwakeKeys.MODE_TIMER && timerEndTime > 0L -> getString(
                 R.string.keepawake_notification_timer,
-                KeepAwakeFormat.duration(timerEndTime - System.currentTimeMillis())
+                KeepAwakeFormat.duration((timerEndTime - System.currentTimeMillis()).coerceAtLeast(0L))
             )
 
             currentMode == KeepAwakeKeys.MODE_APP_BASED -> {
@@ -433,10 +553,10 @@ class KeepAwakeOverlayService : Service() {
                 }
             }
 
-            currentMode == KeepAwakeKeys.MODE_MANUAL ->
-                getString(R.string.keepawake_notification_manual)
+            currentMode == KeepAwakeKeys.MODE_INFINITE || currentMode == KeepAwakeKeys.MODE_MANUAL ->
+                getString(R.string.keepawake_notification_infinite)
 
-            else -> getString(R.string.keepawake_notification_infinite)
+            else -> getString(R.string.keepawake_notification_generic)
         }
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
@@ -458,10 +578,28 @@ class KeepAwakeOverlayService : Service() {
             .build()
     }
 
-    private fun broadcastStatus(running: Boolean) {
-        val intent = Intent(PluginContract.ACTION_PLUGIN_STATUS)
-            .putExtra(PluginContract.EXTRA_PLUGIN_ID, KeepAwakeKeys.PLUGIN_ID)
-            .putExtra(PluginContract.EXTRA_PLUGIN_RUNNING, running)
-        sendBroadcast(intent)
+    private fun publishStatus() {
+        val remaining = if (isRunning && currentMode == KeepAwakeKeys.MODE_TIMER && timerEndTime > 0L) {
+            (timerEndTime - System.currentTimeMillis()).coerceAtLeast(0L)
+        } else -1L
+        val qs = mapOf(
+            KeepAwakeKeys.MODE to currentMode.toString(),
+            KeepAwakeKeys.TIMER_DURATION to timerDurationMinutes.toString(),
+            KeepAwakeKeys.SHOW_NOTIFICATION to showNotification.toString()
+        )
+        val statusText = when {
+            isRunning && currentMode == KeepAwakeKeys.MODE_TIMER && remaining >= 0 -> null
+            isRunning && currentMode == KeepAwakeKeys.MODE_APP_BASED -> if (overlayView != null) "Uygulama etkin" else "Bekleniyor"
+            isRunning -> "Açık"
+            else -> null
+        }
+        PluginStatusPublisher.publish(
+            context = this,
+            pluginId = KeepAwakeKeys.PLUGIN_ID,
+            running = isRunning,
+            quickSettings = qs,
+            remainingMs = remaining,
+            statusText = statusText
+        )
     }
 }

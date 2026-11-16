@@ -8,10 +8,11 @@
     iconRes="@drawable/ic_sessecici"
     settingsActivity="com.toolbox.plugin.sessecici.SesSeciciSettingsActivity"
     mainActivity="com.toolbox.plugin.sessecici.SesSeciciPluginActivity"
+    commandReceiver="com.toolbox.plugin.sessecici.SesSeciciCommandReceiver"
     category="MEDIA"
     tags="ses, ses seçici, çıkış, hoparlör, kulaklık, bluetooth, usb, volume"
     accentColor="#00897B"
-    downloadUrl="https://github.com/toolbox/plugins/releases/latest/download/sessecici.apk"
+    downloadUrl="https://github.com/tprumut/atolye/releases/latest/download/plugin-ses-secici-debug.apk"
     minSdk="26">
     <required-permissions>
         <permission
@@ -30,4 +31,9 @@
             descriptionRes="@string/permission_bluetooth_connect_desc"
             isRequired="false" />
     </required-permissions>
+    <quick-settings>
+        <quick-setting key="auto_apply_on_connect" titleRes="@string/auto_apply_on_connect" type="toggle" defaultValue="true" />
+        <quick-setting key="notification_enabled" titleRes="@string/notification_enabled" type="toggle" defaultValue="true" />
+        <quick-setting key="experimental_app_audio" titleRes="@string/app_audio_experimental" type="toggle" defaultValue="false" />
+    </quick-settings>
 </plugin-metadata>

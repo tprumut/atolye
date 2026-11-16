@@ -2,7 +2,11 @@ package com.toolbox.plugin.sessecici
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -306,6 +310,56 @@ fun SesSeciciSettingsScreen(settings: PluginSettingsManager, onBack: () -> Unit)
                     }
                 }
             }
+            ReliableWorkCard()
         }
+    }
+}
+
+@Composable
+private fun ReliableWorkCard() {
+    val context = LocalContext.current
+    var ignoring by remember { mutableStateOf(isIgnoringBatteryOpt(context)) }
+    OnResume { ignoring = isIgnoringBatteryOpt(context) }
+    Card(shape = AtolyeShapes.CardShape, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.reliable_section), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+            Text(
+                "${stringResource(R.string.battery_opt_status)}: " + if (ignoring) stringResource(R.string.battery_opt_granted) else stringResource(R.string.battery_opt_not_granted),
+                fontSize = 13.sp,
+                color = if (ignoring) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+            )
+            OutlinedButton(onClick = { openBatteryOptSettings(context) }) { Text(stringResource(R.string.open_battery_settings)) }
+            OutlinedButton(onClick = { openAppLaunchOrInfo(context) }) { Text(stringResource(R.string.open_app_launch)) }
+        }
+    }
+}
+
+private fun isIgnoringBatteryOpt(context: Context): Boolean {
+    val pm = context.getSystemService(PowerManager::class.java) ?: return true
+    return pm.isIgnoringBatteryOptimizations(context.packageName)
+}
+
+private fun openBatteryOptSettings(context: Context) {
+    val intents = listOf(
+        Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).setData(Uri.parse("package:${context.packageName}")),
+        Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+    )
+    for (i in intents) {
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (runCatching { context.startActivity(i) }.isSuccess) return
+    }
+}
+
+private fun openAppLaunchOrInfo(context: Context) {
+    val pkg = context.packageName
+    val intents = listOf(
+        Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"),
+        Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.appcontrol.activity.StartupAppControlActivity"),
+        Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity"),
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).setData(Uri.parse("package:$pkg"))
+    )
+    for (i in intents) {
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (runCatching { context.startActivity(i) }.isSuccess) return
     }
 }

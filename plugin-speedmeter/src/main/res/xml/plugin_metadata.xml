@@ -8,9 +8,10 @@
     iconRes="@drawable/ic_speedmeter"
     settingsActivity="com.toolbox.plugin.speedmeter.SpeedMeterSettingsActivity"
     mainActivity="com.toolbox.plugin.speedmeter.SpeedMeterPluginActivity"
+    commandReceiver="com.toolbox.plugin.speedmeter.SpeedMeterCommandReceiver"
     category="NETWORK"
     tags="internet, hız, veri, kullanım, traffic"
-    downloadUrl="https://github.com/toolbox/plugins/releases/latest/download/speedmeter.apk"
+    downloadUrl="https://github.com/tprumut/atolye/releases/latest/download/plugin-speedmeter-debug.apk"
     minSdk="26">
     <required-permissions>
         <permission
@@ -39,4 +40,17 @@
             descriptionRes="@string/permission_post_notifications_desc"
             isRequired="true" />
     </required-permissions>
+    <quick-settings>
+        <quick-setting key="network_mode" titleRes="@string/speedmeter_network_mode" type="choice" defaultValue="0">
+            <option value="0" labelRes="@string/speedmeter_network_mode_total" />
+            <option value="1" labelRes="@string/speedmeter_network_mode_wifi" />
+            <option value="2" labelRes="@string/speedmeter_network_mode_mobile" />
+        </quick-setting>
+        <quick-setting key="unit" titleRes="@string/speedmeter_unit" type="choice" defaultValue="0">
+            <option value="0" labelRes="@string/speedmeter_unit_auto" />
+            <option value="1" labelRes="@string/speedmeter_unit_kbps" />
+            <option value="2" labelRes="@string/speedmeter_unit_mbps" />
+        </quick-setting>
+        <quick-setting key="autostart" titleRes="@string/speedmeter_autostart" type="toggle" defaultValue="true" />
+    </quick-settings>
 </plugin-metadata>

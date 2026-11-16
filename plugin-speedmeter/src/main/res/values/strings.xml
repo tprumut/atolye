@@ -75,4 +75,13 @@
     <string name="speedmeter_notification_big">Günlük: %1$s • Aylık: %2$s</string>
     <string name="speedmeter_notification_measuring">Hız ölçümü çalışıyor</string>
     <string name="back">Geri</string>
+
+    <!-- Reliable -->
+    <string name="reliable_section">Kararlı çalışma</string>
+    <string name="battery_opt_status">Pil optimizasyonu muafiyeti</string>
+    <string name="battery_opt_granted">Verildi</string>
+    <string name="battery_opt_not_granted">Verilmedi</string>
+    <string name="open_battery_settings">Muafiyet ayarını aç</string>
+    <string name="open_app_launch">Uygulama başlatma yönetimi</string>
+    <string name="open_app_info">Uygulama bilgisi</string>
 </resources>

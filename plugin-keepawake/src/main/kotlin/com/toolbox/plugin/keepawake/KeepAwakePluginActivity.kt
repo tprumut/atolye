@@ -65,8 +65,8 @@ class KeepAwakePluginActivity : BasePluginActivity() {
                 )
             ),
             category = PluginCategory.DISPLAY,
-            tags = listOf("ekran", "açık", "tut", "wake", "keep", "screen"),
-            downloadUrl = "https://github.com/toolbox/plugins/releases/latest/download/keepawake.apk",
+            tags = listOf("ekran", "açık", "tut", "wake", "keep", "screen", "uyanık"),
+            downloadUrl = "https://github.com/tprumut/atolye/releases/latest/download/plugin-keepawake-debug.apk",
             minSdk = 26
         )
     }

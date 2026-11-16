@@ -4,7 +4,10 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -46,6 +49,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -448,6 +452,8 @@ fun KeepAwakeSettingsScreen(
                 }
             }
 
+            item { ReliableWorkCard() }
+
             item { KeepAwakeInfoCard() }
         }
     }
@@ -813,6 +819,80 @@ private fun PermissionRow(
                 Text(stringResource(R.string.open_overlay_settings))
             }
         }
+    }
+}
+
+@Composable
+private fun ReliableWorkCard() {
+    val context = LocalContext.current
+    var ignoring by remember { mutableStateOf(isIgnoringBatteryOpt(context)) }
+    OnResume { ignoring = isIgnoringBatteryOpt(context) }
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = AtolyeShapes.CardShape,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.reliable_section),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "${stringResource(R.string.battery_opt_status)}: " +
+                    if (ignoring) stringResource(R.string.battery_opt_granted) else stringResource(R.string.battery_opt_not_granted),
+                fontSize = 13.sp,
+                color = if (ignoring) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+            )
+            OutlinedButton(
+                onClick = { openBatteryOptSettings(context) },
+                shape = AtolyeShapes.ButtonShape
+            ) {
+                Text(stringResource(R.string.open_battery_settings))
+            }
+            OutlinedButton(
+                onClick = { openAppLaunchOrInfo(context) },
+                shape = AtolyeShapes.ButtonShape
+            ) {
+                Text(stringResource(R.string.open_app_launch))
+            }
+        }
+    }
+}
+
+private fun isIgnoringBatteryOpt(context: Context): Boolean {
+    val pm = context.getSystemService(PowerManager::class.java) ?: return true
+    return pm.isIgnoringBatteryOptimizations(context.packageName)
+}
+
+private fun openBatteryOptSettings(context: Context) {
+    val intents = listOf(
+        Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).setData(Uri.parse("package:${context.packageName}")),
+        Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+    )
+    for (i in intents) {
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (runCatching { context.startActivity(i) }.isSuccess) return
+    }
+}
+
+private fun openAppLaunchOrInfo(context: Context) {
+    val pkg = context.packageName
+    val intents = listOf(
+        Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"),
+        Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.appcontrol.activity.StartupAppControlActivity"),
+        Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity"),
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).setData(Uri.parse("package:$pkg"))
+    )
+    for (i in intents) {
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (runCatching { context.startActivity(i) }.isSuccess) return
     }
 }
 

@@ -8,9 +8,10 @@
     iconRes="@drawable/ic_keepawake"
     settingsActivity="com.toolbox.plugin.keepawake.KeepAwakeSettingsActivity"
     mainActivity="com.toolbox.plugin.keepawake.KeepAwakePluginActivity"
+    commandReceiver="com.toolbox.plugin.keepawake.KeepAwakeCommandReceiver"
     category="DISPLAY"
-    tags="ekran, açık, tut, wake, keep, screen"
-    downloadUrl="https://github.com/toolbox/plugins/releases/latest/download/keepawake.apk"
+    tags="ekran, açık, tut, wake, keep, screen, uyanık"
+    downloadUrl="https://github.com/tprumut/atolye/releases/latest/download/plugin-keepawake-debug.apk"
     minSdk="26">
     <required-permissions>
         <permission
@@ -44,4 +45,18 @@
             descriptionRes="@string/permission_post_notifications_desc"
             isRequired="true" />
     </required-permissions>
+    <quick-settings>
+        <quick-setting key="mode" titleRes="@string/qs_mode" type="choice" defaultValue="1">
+            <option value="1" labelRes="@string/qs_mode_timed" />
+            <option value="2" labelRes="@string/qs_mode_infinite" />
+            <option value="3" labelRes="@string/qs_mode_app" />
+        </quick-setting>
+        <quick-setting key="timer_duration" titleRes="@string/qs_duration" type="choice" defaultValue="15">
+            <option value="15" labelRes="@string/keepawake_timer_15min" />
+            <option value="30" labelRes="@string/keepawake_timer_30min" />
+            <option value="60" labelRes="@string/keepawake_timer_1hour" />
+            <option value="120" labelRes="@string/keepawake_timer_2hour" />
+        </quick-setting>
+        <quick-setting key="show_notification" titleRes="@string/qs_notification" type="toggle" defaultValue="true" />
+    </quick-settings>
 </plugin-metadata>

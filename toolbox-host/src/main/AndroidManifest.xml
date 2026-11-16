@@ -2,8 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Atölye Host - No special permissions needed for host itself -->
-    <!-- Plugins declare their own permissions in their manifests -->
+    <!-- Eklenti kontrol kanalı (imza seviyesi) -->
+    <permission
+        android:name="com.toolbox.permission.CONTROL_PLUGIN"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="com.toolbox.permission.CONTROL_PLUGIN" />
+
+    <!-- Pil optimizasyonu muafiyeti isteği (Huawei/arka plan kararlılığı) -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
         android:name=".AtolyeApplication"

@@ -20,6 +20,7 @@ import android.os.Looper
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.toolbox.plugin.PluginSettingsManager
+import com.toolbox.plugin.PluginStatusPublisher
 
 /**
  * Ağ hızını saniyede bir ölçen ön plan servisi.
@@ -126,6 +127,7 @@ class SpeedMeterService : Service() {
 
         // Ön plan bildirimi hemen gösterilmeli (5 saniye kuralı).
         startForegroundCompat(buildNotification(0L, 0L))
+        publishStatus(0L, 0L)
         handler.post(tick)
     }
 
@@ -162,6 +164,7 @@ class SpeedMeterService : Service() {
         SpeedMeterStats.writeCounters(this, lastRx, lastTx)
         settings.putBoolean(SpeedMeterKeys.PLUGIN_ID, SpeedMeterKeys.SERVICE_RUNNING, false)
         stopForeground(STOP_FOREGROUND_REMOVE)
+        publishStoppedStatus()
         super.onDestroy()
     }
 
@@ -196,6 +199,7 @@ class SpeedMeterService : Service() {
 
         broadcastSpeeds(deltaRx, deltaTx)
         notifyIfNeeded(deltaRx, deltaTx)
+        publishStatus(deltaRx, deltaTx)
     }
 
     private fun loadSettings() {
@@ -347,6 +351,43 @@ class SpeedMeterService : Service() {
     private fun unregisterNetworkCallback() {
         runCatching {
             connectivityManager?.unregisterNetworkCallback(networkCallback)
+        }
+    }
+
+    private fun publishStatus(download: Long, upload: Long) {
+        try {
+            val speedText = "↓ ${SpeedMeterFormat.speed(download, unitMode)}  ↑ ${SpeedMeterFormat.speed(upload, unitMode)}"
+            val qs = mapOf(
+                SpeedMeterKeys.NETWORK_MODE to networkMode.toString(),
+                SpeedMeterKeys.UNIT to unitMode.toString(),
+                SpeedMeterKeys.AUTOSTART to settings.getBoolean(SpeedMeterKeys.PLUGIN_ID, SpeedMeterKeys.AUTOSTART, true).toString()
+            )
+            PluginStatusPublisher.publish(
+                context = this,
+                pluginId = SpeedMeterKeys.PLUGIN_ID,
+                running = true,
+                quickSettings = qs,
+                statusText = speedText
+            )
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun publishStoppedStatus() {
+        try {
+            val qs = mapOf(
+                SpeedMeterKeys.NETWORK_MODE to settings.getInt(SpeedMeterKeys.PLUGIN_ID, SpeedMeterKeys.NETWORK_MODE, 0).toString(),
+                SpeedMeterKeys.UNIT to settings.getInt(SpeedMeterKeys.PLUGIN_ID, SpeedMeterKeys.UNIT, 0).toString(),
+                SpeedMeterKeys.AUTOSTART to settings.getBoolean(SpeedMeterKeys.PLUGIN_ID, SpeedMeterKeys.AUTOSTART, true).toString()
+            )
+            PluginStatusPublisher.publish(
+                context = this,
+                pluginId = SpeedMeterKeys.PLUGIN_ID,
+                running = false,
+                quickSettings = qs,
+                statusText = null
+            )
+        } catch (_: Exception) {
         }
     }
 }

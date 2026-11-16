@@ -11,6 +11,12 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Host control channel -->
+    <permission
+        android:name="com.toolbox.permission.CONTROL_PLUGIN"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="com.toolbox.permission.CONTROL_PLUGIN" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -77,6 +83,16 @@
         <receiver
             android:name=".SesSeciciActionReceiver"
             android:exported="false" />
+
+        <!-- Host command receiver -->
+        <receiver
+            android:name=".SesSeciciCommandReceiver"
+            android:exported="true"
+            android:permission="com.toolbox.permission.CONTROL_PLUGIN">
+            <intent-filter>
+                <action android:name="com.toolbox.PLUGIN_COMMAND" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

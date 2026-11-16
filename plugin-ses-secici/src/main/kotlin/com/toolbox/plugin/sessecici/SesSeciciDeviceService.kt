@@ -18,6 +18,7 @@ import android.os.Looper
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.toolbox.plugin.PluginSettingsManager
+import com.toolbox.plugin.PluginStatusPublisher
 
 class SesSeciciDeviceService : Service() {
 
@@ -54,6 +55,7 @@ class SesSeciciDeviceService : Service() {
         createChannel()
         registerCallback()
         ensureForegroundOrStop()
+        publishState(true)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -63,13 +65,14 @@ class SesSeciciDeviceService : Service() {
                 stopForegroundClean()
                 return START_NOT_STICKY
             }
-            ACTION_REFRESH -> updateNotification()
-            else -> ensureForegroundOrStop()
+            ACTION_REFRESH -> { updateNotification(); publishState(fg) }
+            else -> { ensureForegroundOrStop(); publishState(fg) }
         }
         return START_STICKY
     }
 
     override fun onDestroy() {
+        publishState(false)
         unregisterCallback()
         super.onDestroy()
     }
@@ -88,10 +91,12 @@ class SesSeciciDeviceService : Service() {
                     }
                 }
                 updateNotification()
+                publishState(fg)
             }
 
             override fun onAudioDevicesRemoved(removedDevices: Array<out AudioDeviceInfo>?) {
                 updateNotification()
+                publishState(fg)
             }
         }
         callback = cb
@@ -156,6 +161,22 @@ class SesSeciciDeviceService : Service() {
     private fun stopForegroundClean() {
         try { stopForeground(STOP_FOREGROUND_REMOVE) } catch (_: Throwable) {}
         fg = false
+        publishState(false)
         stopSelf()
+    }
+
+    private fun publishState(running: Boolean) {
+        try {
+            val qs = mapOf(
+                SesSeciciKeys.AUTO_APPLY_ON_CONNECT to settings.getBoolean(SesSeciciKeys.PLUGIN_ID, SesSeciciKeys.AUTO_APPLY_ON_CONNECT, true).toString(),
+                SesSeciciKeys.NOTIFICATION_ENABLED to settings.getBoolean(SesSeciciKeys.PLUGIN_ID, SesSeciciKeys.NOTIFICATION_ENABLED, true).toString(),
+                SesSeciciKeys.EXPERIMENTAL_APP_AUDIO to settings.getBoolean(SesSeciciKeys.PLUGIN_ID, SesSeciciKeys.EXPERIMENTAL_APP_AUDIO, false).toString()
+            )
+            val text = try {
+                val devices = SesSeciciAudio.listOutputDevices(this, settings)
+                devices.firstOrNull { it.isCurrent }?.name ?: devices.firstOrNull()?.name
+            } catch (_: Exception) { null }
+            PluginStatusPublisher.publish(this, SesSeciciKeys.PLUGIN_ID, running, qs, statusText = text)
+        } catch (_: Exception) {}
     }
 }

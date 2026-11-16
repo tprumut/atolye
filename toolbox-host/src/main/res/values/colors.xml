@@ -1,9 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="toolbox_primary">#1976D2</color>
-    <color name="toolbox_primary_container">#BBDEFB</color>
-    <color name="toolbox_secondary">#388E3C</color>
-    <color name="toolbox_secondary_container">#C8E6C9</color>
-    <color name="toolbox_tertiary">#F57C00</color>
-    <color name="toolbox_tertiary_container">#FFE0B2</color>
+    <color name="ic_launcher_background">#F7F0E5</color>
+    <color name="brand_navy">#203B56</color>
+    <color name="brand_orange">#F39220</color>
+    <color name="brand_surface">#FFFAF2</color>
 </resources>

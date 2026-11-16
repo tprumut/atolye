@@ -16,6 +16,9 @@ import com.toolbox.contract.PluginCategory
 import com.toolbox.contract.PluginContract
 import com.toolbox.contract.PluginMetadata
 import com.toolbox.contract.PluginPermission
+import com.toolbox.contract.PluginQuickSetting
+import com.toolbox.contract.QuickSettingOption
+import com.toolbox.contract.QuickSettingType
 import org.xmlpull.v1.XmlPullParser
 
 /**
@@ -72,17 +75,17 @@ class PluginDiscovery(context: Context) {
         settings.getBoolean(pluginId, PluginSettingsKeys.ENABLED, true)
 
     /** Eklentinin ana ekranını açar. */
-    fun launchPlugin(plugin: InstalledPlugin, action: String? = null): Boolean {
+    fun launchPlugin(plugin: InstalledPlugin, action: String? = null, from: Context? = null): Boolean {
         val className = plugin.metadata.mainActivity.ifBlank {
             findMainActivityName(plugin.packageName) ?: ""
         }
-        return startPluginComponent(plugin, className, action)
+        return startPluginComponent(plugin, className, action, from)
     }
 
     /** Eklentinin ayarlar ekranını açar. */
-    fun openPluginSettings(plugin: InstalledPlugin): Boolean {
+    fun openPluginSettings(plugin: InstalledPlugin, from: Context? = null): Boolean {
         val className = plugin.metadata.settingsActivity ?: return false
-        return startPluginComponent(plugin, className, PluginContract.ACTION_OPEN_SETTINGS)
+        return startPluginComponent(plugin, className, PluginContract.ACTION_OPEN_SETTINGS, from)
     }
 
     /** Eklenti indirme bağlantısı. */
@@ -144,12 +147,16 @@ class PluginDiscovery(context: Context) {
         var iconResName: String? = null
         var settingsActivity: String? = null
         var mainActivity = ""
+        var commandReceiver: String? = null
         var category = PluginCategory.TOOLS
         var tags = emptyList<String>()
         var downloadUrl: String? = null
         var minSdk = 26
         var accentColor: String? = null
         val permissions = mutableListOf<PluginPermission>()
+        val quickSettings = mutableListOf<PluginQuickSetting>()
+
+        var currentQs: MutableQuickSetting? = null
 
         var event = parser.eventType
         while (event != XmlPullParser.END_DOCUMENT) {
@@ -170,6 +177,7 @@ class PluginDiscovery(context: Context) {
                             ?: iconName(resources, parser, "iconResName")
                         settingsActivity = parser.attr("settingsActivity")
                         mainActivity = parser.attr("mainActivity") ?: ""
+                        commandReceiver = parser.attr("commandReceiver")
                         category = parseCategory(parser.attr("category"))
                         tags = parser.attr("tags")
                             ?.split(',')
@@ -204,6 +212,62 @@ class PluginDiscovery(context: Context) {
                             )
                         }
                     }
+
+                    "quick-setting", "quickSetting" -> {
+                        if (quickSettings.size < 6) {
+                            val key = parser.attr("key") ?: parser.attr("name") ?: ""
+                            if (key.isNotBlank()) {
+                                val type = parseQuickSettingType(parser.attr("type"))
+                                currentQs = MutableQuickSetting(
+                                    key = key,
+                                    title = resolveString(resources, packageName, parser, "titleRes"),
+                                    type = type,
+                                    defaultValue = parser.attr("defaultValue")
+                                        ?: parser.attr("default")
+                                        ?: if (type == QuickSettingType.TOGGLE) "false" else ""
+                                )
+                            }
+                        }
+                    }
+
+                    "option" -> {
+                        val qs = currentQs ?: run {
+                            // no-op if not inside a quick-setting
+                            null
+                        }
+                        if (qs != null) {
+                            val value = parser.attr("value") ?: ""
+                            if (value.isNotBlank()) {
+                                qs.options.add(
+                                    QuickSettingOption(
+                                        value = value,
+                                        label = resolveString(resources, packageName, parser, "labelRes")
+                                            .ifBlank { parser.attr("label") ?: value }
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            } else if (event == XmlPullParser.END_TAG) {
+                when (parser.name) {
+                    "quick-setting", "quickSetting" -> {
+                        currentQs?.let { qs ->
+                            val finalDefault = qs.defaultValue.ifBlank {
+                                if (qs.type == QuickSettingType.CHOICE) qs.options.firstOrNull()?.value.orEmpty() else "false"
+                            }
+                            quickSettings.add(
+                                PluginQuickSetting(
+                                    key = qs.key,
+                                    title = qs.title,
+                                    type = qs.type,
+                                    options = qs.options.toList(),
+                                    defaultValue = finalDefault
+                                )
+                            )
+                        }
+                        currentQs = null
+                    }
                 }
             }
             event = parser.next()
@@ -218,31 +282,50 @@ class PluginDiscovery(context: Context) {
             iconResName = iconResName,
             settingsActivity = settingsActivity,
             mainActivity = mainActivity,
+            commandReceiver = commandReceiver,
             requiredPermissions = permissions,
             category = category,
             tags = tags,
             downloadUrl = downloadUrl,
             minSdk = minSdk,
-            accentColor = accentColor
+            accentColor = accentColor,
+            quickSettings = quickSettings.take(6)
         )
+    }
+
+    private data class MutableQuickSetting(
+        val key: String,
+        val title: String,
+        val type: QuickSettingType,
+        var defaultValue: String,
+        val options: MutableList<QuickSettingOption> = mutableListOf()
+    )
+
+    private fun parseQuickSettingType(value: String?): QuickSettingType = when (value?.lowercase()) {
+        "choice", "select", "option", "options" -> QuickSettingType.CHOICE
+        else -> QuickSettingType.TOGGLE
     }
 
     private fun startPluginComponent(
         plugin: InstalledPlugin,
         className: String,
-        action: String?
+        action: String?,
+        from: Context? = null
     ): Boolean {
         if (className.isBlank()) return false
 
+        val ctx = from ?: appContext
         val intent = Intent(PluginContract.ACTION_PLUGIN).apply {
             component = ComponentName(plugin.packageName, className)
             putExtra(PluginContract.EXTRA_PLUGIN_ID, plugin.metadata.pluginId)
             action?.let { putExtra(PluginContract.EXTRA_PLUGIN_ACTION, it) }
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            if (ctx !is android.app.Activity) {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
         }
 
         return try {
-            appContext.startActivity(intent)
+            ctx.startActivity(intent)
             true
         } catch (e: Exception) {
             Log.e(TAG, "Eklenti açılamadı: ${plugin.packageName}/$className", e)
@@ -361,20 +444,50 @@ class PluginDiscovery(context: Context) {
 }
 
 /**
- * Eklenti durum yayınlarını dinlemek için basit receiver.
+ * Eklenti durum yayınlarını dinlemek için receiver.
  */
 class PluginStatusReceiver : BroadcastReceiver() {
 
-    private var listener: ((pluginId: String, running: Boolean) -> Unit)? = null
+    data class Status(
+        val pluginId: String,
+        val running: Boolean,
+        val quickSettings: Map<String, String> = emptyMap(),
+        val remainingMs: Long = -1L,
+        val statusText: String? = null
+    )
 
-    fun setListener(listener: (pluginId: String, running: Boolean) -> Unit) {
+    private var listener: ((Status) -> Unit)? = null
+    private var simpleListener: ((pluginId: String, running: Boolean) -> Unit)? = null
+
+    fun setListener(listener: (Status) -> Unit) {
         this.listener = listener
+    }
+
+    /** Geriye dönük uyumlu dinleyici. */
+    fun setListener(listener: (pluginId: String, running: Boolean) -> Unit) {
+        this.simpleListener = listener
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         val pluginId = intent.getStringExtra(PluginContract.EXTRA_PLUGIN_ID) ?: return
         val running = intent.getBooleanExtra(PluginContract.EXTRA_PLUGIN_RUNNING, false)
-        listener?.invoke(pluginId, running)
+        val remainingMs = intent.getLongExtra(PluginContract.EXTRA_REMAINING_MS, -1L)
+        val statusText = intent.getStringExtra(PluginContract.EXTRA_STATUS_TEXT)
+        val qsBundle = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getBundleExtra(PluginContract.EXTRA_QUICK_SETTINGS)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getBundleExtra(PluginContract.EXTRA_QUICK_SETTINGS)
+        }
+        val quickSettings = buildMap {
+            qsBundle?.keySet()?.forEach { k ->
+                val v = qsBundle.getString(k)
+                if (v != null) put(k, v)
+            }
+        }
+        val status = Status(pluginId, running, quickSettings, remainingMs, statusText)
+        listener?.invoke(status)
+        simpleListener?.invoke(pluginId, running)
     }
 
     fun register(context: Context) {

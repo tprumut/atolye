@@ -6,7 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -40,6 +43,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -55,6 +59,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +70,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.atolye.design.AtolyeShapes
 import com.atolye.design.AtolyeTheme
 import com.toolbox.plugin.PluginSettingsManager
@@ -396,6 +404,7 @@ fun SpeedMeterSettingsSections(
             )
         }
 
+        ReliableWorkCard()
         InfoCard()
     }
 }
@@ -596,6 +605,72 @@ private fun UsageValue(label: String, value: String) {
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
+    }
+}
+
+@Composable
+private fun ReliableWorkCard() {
+    val context = LocalContext.current
+    var ignoring by remember { mutableStateOf(isIgnoringBatteryOpt(context)) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val current by rememberUpdatedState(newValue = { ignoring = isIgnoringBatteryOpt(context) })
+    DisposableEffect(lifecycleOwner) {
+        val obs = LifecycleEventObserver { _, e -> if (e == Lifecycle.Event.ON_RESUME) current() }
+        lifecycleOwner.lifecycle.addObserver(obs)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
+    }
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = AtolyeShapes.CardShape,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.reliable_section), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+            Text(
+                "${stringResource(R.string.battery_opt_status)}: " +
+                    if (ignoring) stringResource(R.string.battery_opt_granted) else stringResource(R.string.battery_opt_not_granted),
+                fontSize = 13.sp,
+                color = if (ignoring) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+            )
+            OutlinedButton(onClick = { openBatteryOptSettings(context) }, shape = AtolyeShapes.ButtonShape) {
+                Text(stringResource(R.string.open_battery_settings))
+            }
+            OutlinedButton(onClick = { openAppLaunchOrInfo(context) }, shape = AtolyeShapes.ButtonShape) {
+                Text(stringResource(R.string.open_app_launch))
+            }
+        }
+    }
+}
+
+private fun isIgnoringBatteryOpt(context: Context): Boolean {
+    val pm = context.getSystemService(PowerManager::class.java) ?: return true
+    return pm.isIgnoringBatteryOptimizations(context.packageName)
+}
+
+private fun openBatteryOptSettings(context: Context) {
+    val intents = listOf(
+        Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).setData(Uri.parse("package:${context.packageName}")),
+        Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+    )
+    for (i in intents) {
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (runCatching { context.startActivity(i) }.isSuccess) return
+    }
+}
+
+private fun openAppLaunchOrInfo(context: Context) {
+    val pkg = context.packageName
+    val intents = listOf(
+        Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"),
+        Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.appcontrol.activity.StartupAppControlActivity"),
+        Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity"),
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).setData(Uri.parse("package:$pkg"))
+    )
+    for (i in intents) {
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (runCatching { context.startActivity(i) }.isSuccess) return
     }
 }
 

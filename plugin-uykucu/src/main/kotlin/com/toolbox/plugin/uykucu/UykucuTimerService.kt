@@ -23,6 +23,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.toolbox.contract.PluginContract
 import com.toolbox.plugin.PluginSettingsManager
+import com.toolbox.plugin.PluginStatusPublisher
 import java.util.concurrent.TimeUnit
 
 class UykucuTimerService : Service() {
@@ -79,6 +80,7 @@ class UykucuTimerService : Service() {
                 handleFinish()
             } else {
                 updateNotification()
+                publishRichStatus(true)
                 handler.postDelayed(this, 1000L)
             }
         }
@@ -490,6 +492,20 @@ class UykucuTimerService : Service() {
             .putExtra(PluginContract.EXTRA_PLUGIN_ID, UykucuKeys.PLUGIN_ID)
             .putExtra(PluginContract.EXTRA_PLUGIN_RUNNING, running)
         sendBroadcast(i)
+        publishRichStatus(running)
+    }
+
+    private fun publishRichStatus(running: Boolean) {
+        try {
+            val actualRunning = running && isRunning && endTimeMs > System.currentTimeMillis()
+            val remaining = if (actualRunning) (endTimeMs - System.currentTimeMillis()).coerceAtLeast(0L) else -1L
+            val qs = mapOf(
+                UykucuKeys.STOP_MEDIA_ENABLED to settings.getBoolean(UykucuKeys.PLUGIN_ID, UykucuKeys.STOP_MEDIA_ENABLED, true).toString(),
+                UykucuKeys.CLOSE_APPS_ENABLED to settings.getBoolean(UykucuKeys.PLUGIN_ID, UykucuKeys.CLOSE_APPS_ENABLED, true).toString(),
+                UykucuKeys.REMEMBER_LAST_DURATION to settings.getBoolean(UykucuKeys.PLUGIN_ID, UykucuKeys.REMEMBER_LAST_DURATION, true).toString()
+            )
+            PluginStatusPublisher.publish(this, UykucuKeys.PLUGIN_ID, actualRunning, qs, remaining, null)
+        } catch (_: Exception) {}
     }
 
     private fun stopForegroundClean() {

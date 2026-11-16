@@ -13,27 +13,22 @@ import androidx.compose.material3.Shapes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 /**
- * Atölye Tasarım Sistemi - Şekiller
- * Köşe yuvarlaklığı: 16dp (standart)
- * Kartlarda gölge yerine ince çerçeve kullanılır
+ * Atölye 2.0 — Şekiller
+ * Kart köşeleri 20-24dp, yumuşak ve minimal.
  */
 object AtolyeShapes {
-
-    // Temel köşe yarıçapları
-    val CornerRadiusSmall = 8.dp
-    val CornerRadiusMedium = 12.dp
-    val CornerRadiusLarge = 16.dp  // Standart kart köşesi
+    val CornerRadiusSmall = 10.dp
+    val CornerRadiusMedium = 16.dp
+    val CornerRadiusLarge = 22.dp
     val CornerRadiusXLarge = 24.dp
-    val CornerRadiusFull = 1000.dp // Large enough to be fully rounded
+    val CornerRadiusFull = 1000.dp
 
-    // Material3 Shapes mapping
     val AtolyeShapes = Shapes(
         extraSmall = RoundedCornerShape(CornerRadiusSmall),
         small = RoundedCornerShape(CornerRadiusMedium),
@@ -42,47 +37,15 @@ object AtolyeShapes {
         extraLarge = RoundedCornerShape(CornerRadiusFull)
     )
 
-    // Özel şekiller
     val CardShape = RoundedCornerShape(CornerRadiusLarge)
     val ButtonShape = RoundedCornerShape(CornerRadiusMedium)
     val ChipShape = RoundedCornerShape(CornerRadiusFull)
     val DialogShape = RoundedCornerShape(CornerRadiusXLarge)
     val BottomSheetShape = RoundedCornerShape(topStart = CornerRadiusXLarge, topEnd = CornerRadiusXLarge)
     val NotificationShape = RoundedCornerShape(CornerRadiusMedium)
-    val OverlayShape = RoundedCornerShape(CornerRadiusSmall)
-
-    // Altıgen ikon şekli (uyarlanabilir ikon için) - PathOutline için
-    val HexagonPath = Path().apply {
-        fillType = PathFillType.EvenOdd
-        val radius = 48f
-        val centerX = 48f
-        val centerY = 48f
-        val innerRadius = 18f // Orta yuva yarıçapı
-
-        // Dış altıgen
-        for (i in 0..5) {
-            val angle = (i * 60 - 30) * Math.PI / 180
-            val x = centerX + radius * Math.cos(angle).toFloat()
-            val y = centerY + radius * Math.sin(angle).toFloat()
-            if (i == 0) moveTo(x, y) else lineTo(x, y)
-        }
-        close()
-
-        // İç altıgen (yuva) - ters yönde çizdirerek "delik" efekti
-        for (i in 5 downTo 0) {
-            val angle = (i * 60 - 30) * Math.PI / 180
-            val x = centerX + innerRadius * Math.cos(angle).toFloat()
-            val y = centerY + innerRadius * Math.sin(angle).toFloat()
-            lineTo(x, y)
-        }
-        close()
-    }
+    val OverlayShape = RoundedCornerShape(CornerRadiusMedium)
 }
 
-/**
- * Kart çerçeve çizimi için helper
- * Gölge yerine ince çerçeve (1dp) kullanılır
- */
 @Composable
 fun AtolyeCard(
     modifier: Modifier = Modifier,
@@ -90,19 +53,13 @@ fun AtolyeCard(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Card(
-        modifier = modifier
-            .border(1.dp, colors.outlineVariant, shape = AtolyeShapes.CardShape),
+        modifier = modifier.border(1.dp, colors.outlineVariant, shape = AtolyeShapes.CardShape),
         shape = AtolyeShapes.CardShape,
-        colors = CardDefaults.cardColors(
-            containerColor = colors.surface
-        ),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
         content = content
     )
 }
 
-/**
- * Yükseltme gölgeli kart (gerektiğinde)
- */
 @Composable
 fun AtolyeElevatedCard(
     modifier: Modifier = Modifier,
@@ -111,20 +68,14 @@ fun AtolyeElevatedCard(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Card(
-        modifier = modifier
-            .border(1.dp, colors.outlineVariant, shape = AtolyeShapes.CardShape),
+        modifier = modifier.border(1.dp, colors.outlineVariant, shape = AtolyeShapes.CardShape),
         shape = AtolyeShapes.CardShape,
         elevation = CardDefaults.cardElevation(defaultElevation = elevation),
-        colors = CardDefaults.cardColors(
-            containerColor = colors.surface
-        ),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
         content = content
     )
 }
 
-/**
- * İçerik kartı - alt bölümler için
- */
 @Composable
 fun AtolyeContentCard(
     modifier: Modifier = Modifier,

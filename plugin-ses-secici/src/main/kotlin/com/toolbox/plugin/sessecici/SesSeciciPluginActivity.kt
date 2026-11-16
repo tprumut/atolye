@@ -28,7 +28,7 @@ class SesSeciciPluginActivity : BasePluginActivity() {
             category = PluginCategory.MEDIA,
             tags = listOf("ses", "çıkış", "bluetooth", "kulaklık", "hoparlör", "usb"),
             accentColor = "#00897B",
-            downloadUrl = "https://github.com/toolbox/plugins/releases/latest/download/sessecici.apk",
+            downloadUrl = "https://github.com/tprumut/atolye/releases/latest/download/plugin-ses-secici-debug.apk",
             minSdk = 26
         )
     }
