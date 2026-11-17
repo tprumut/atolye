@@ -101,7 +101,7 @@ fun EmptyPluginsState(
             Text(stringResource(R.string.welcome_description), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
             Button(onClick = onAddClick, shape = AtolyeShapes.ButtonShape) {
                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                Text(stringResource(R.string.discover_plugins), modifier = Modifier.padding(start = 8.dp))
+                Text(stringResource(R.string.browse_plugins), modifier = Modifier.padding(start = 8.dp))
             }
         }
     }

@@ -81,6 +81,7 @@ import com.atolye.design.AtolyeShapes
 import com.atolye.design.AtolyeThemeType
 import com.atolye.host.AtolyeApplication
 import com.atolye.host.R
+import com.atolye.host.github.PluginBrowserBottomSheet
 import com.atolye.host.ui.components.EmptyPluginsState
 import com.atolye.host.ui.components.LoadingGrid
 import com.atolye.host.ui.components.PluginGrid
@@ -114,7 +115,7 @@ fun MainScreen(
     val error by viewModel.error.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
-    var showAddDialog by remember { mutableStateOf(false) }
+    var showPluginBrowser by remember { mutableStateOf(false) }
     var showHidden by remember { mutableStateOf(false) }
     var editItem by remember { mutableStateOf<PluginUiItem?>(null) }
     var pendingStartItem by remember { mutableStateOf<PluginUiItem?>(null) }
@@ -181,7 +182,7 @@ fun MainScreen(
                     hiddenCount = hiddenCount,
                     showHidden = showHidden,
                     onToggleHidden = { showHidden = !showHidden },
-                    onAddClick = { showAddDialog = true },
+                    onAddClick = { showPluginBrowser = true },
                     onThemeClick = { app.cycleTheme() },
                     onRefreshClick = { viewModel.loadPlugins() }
                 )
@@ -215,7 +216,7 @@ fun MainScreen(
 
                 when {
                     isLoading && items.isEmpty() -> LoadingGrid(modifier = Modifier.weight(1f))
-                    items.isEmpty() -> EmptyPluginsState(onAddClick = { showAddDialog = true }, modifier = Modifier.weight(1f))
+                    items.isEmpty() -> EmptyPluginsState(onAddClick = { showPluginBrowser = true }, modifier = Modifier.weight(1f))
                     else -> PluginGrid(
                         items = visibleItems,
                         onPluginClick = onPluginClick,
@@ -238,14 +239,6 @@ fun MainScreen(
         }
     }
 
-    if (showAddDialog) {
-        AlertDialog(
-            onDismissRequest = { showAddDialog = false },
-            title = { Text(stringResource(R.string.add_plugin_dialog_title)) },
-            text = { Text(stringResource(R.string.add_plugin_dialog_text)) },
-            confirmButton = { TextButton(onClick = { showAddDialog = false }) { Text(stringResource(R.string.close)) } }
-        )
-    }
     editItem?.let { item ->
         EditCardDialog(
             item = item,
@@ -289,6 +282,12 @@ fun MainScreen(
             dismissButton = {
                 TextButton(onClick = { deleteConfirmItem = null }) { Text(stringResource(R.string.cancel)) }
             }
+        )
+    }
+    // Plugin browser bottom sheet
+    if (showPluginBrowser) {
+        PluginBrowserBottomSheet(
+            onDismiss = { showPluginBrowser = false }
         )
     }
 }

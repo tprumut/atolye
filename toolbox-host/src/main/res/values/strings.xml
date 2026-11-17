@@ -10,7 +10,10 @@
     <string name="welcome_description">Atölye, küçük ve odaklı araçları tek bir yerden yönetmeni sağlar. Başlamak için bir eklenti kur.</string>
     <string name="no_plugins_installed">Henüz eklenti yok</string>
     <string name="no_plugins_description">Eklentiler ayrı APK dosyaları olarak kurulur. Kurduğun araçlar burada görünür.</string>
+    <string name="no_plugins_found">Eklenti bulunamadı</string>
+    <string name="search_plugins">Eklenti ara...</string>
     <string name="discover_plugins">Eklenti kur</string>
+    <string name="browse_plugins">Eklentilere göz at</string>
     <string name="add_plugin">Eklenti ekle</string>
     <string name="add_plugin_desc">Yeni bir eklenti kur</string>
     <string name="add_plugin_desc_short">Ayrı APK olarak yükle</string>
