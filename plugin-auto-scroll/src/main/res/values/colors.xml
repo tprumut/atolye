@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="autoscroll_primary">#C4553D</color>
+    <color name="autoscroll_primary_container">#8E3A28</color>
+    <color name="autoscroll_secondary">#F08A62</color>
+</resources>

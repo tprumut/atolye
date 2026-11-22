@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -25,6 +26,7 @@ import androidx.core.content.ContextCompat
 import com.toolbox.contract.PluginContract
 import com.toolbox.plugin.PluginSettingsManager
 import com.toolbox.plugin.PluginStatusPublisher
+import com.toolbox.plugin.StatusBarIconPolicy
 import java.util.concurrent.TimeUnit
 
 /**
@@ -37,7 +39,12 @@ import java.util.concurrent.TimeUnit
 class KeepAwakeOverlayService : Service() {
 
     companion object {
-        const val CHANNEL_ID = "keepawake_channel"
+        /** Gerçek servis durumu; shared_prefs'deki service_running bayrağı bayat kalabiliyor. */
+        @Volatile
+        var isAlive: Boolean = false
+
+        const val CHANNEL_ID = "keepawake_channel_v2"
+        const val LEGACY_CHANNEL_ID = "keepawake_channel"
         const val NOTIFICATION_ID = 2001
 
         const val ACTION_START = "com.toolbox.plugin.keepawake.START"
@@ -57,7 +64,13 @@ class KeepAwakeOverlayService : Service() {
         }
 
         fun stop(context: Context) {
+            // Servis zaten ölmüşse onDestroy çalışmaz; bayrağı burada temizle ki
+            // kart güç düğmesi bir sonraki basışta START göndersin.
+            val settings = PluginSettingsManager(context)
+            settings.putBoolean(KeepAwakeKeys.PLUGIN_ID, KeepAwakeKeys.SERVICE_RUNNING, false)
+            settings.putLong(KeepAwakeKeys.PLUGIN_ID, "timer_end_time", 0L)
             context.stopService(Intent(context, KeepAwakeOverlayService::class.java))
+            publishCurrentStatus(context)
         }
 
         fun toggle(context: Context) {
@@ -73,6 +86,20 @@ class KeepAwakeOverlayService : Service() {
                 context.startService(intent)
             } catch (_: Exception) {
             }
+        }
+
+        /**
+         * Hızlı ayardan süre/mot değiştirildiğinde çağrılır. Servis gerçekten
+         * çalışmıyorsa ACTION_APPLY yalnızca durum yayınlar, ekranı açık tutmaz;
+         * bu yüzden burada doğrudan ön plan servisini başlatıyoruz.
+         */
+        fun ensureRunning(context: Context) {
+            if (isAlive) {
+                applySettings(context)
+                return
+            }
+            // Extra yok: onStartCommand mevcut mod/süreyi shared_prefs'den okur.
+            start(context, -1, -1)
         }
 
         fun publishCurrentStatus(context: Context) {
@@ -118,6 +145,13 @@ class KeepAwakeOverlayService : Service() {
     private var lastForegroundPackage: String? = null
     private var lastUsageQueryTime = 0L
 
+    // Hız göstergesi açılıp kapanınca durum çubuğu ikonunu yeniler.
+    private val iconPolicyReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (foregroundStarted) updateNotification()
+        }
+    }
+
     private val timerTick = object : Runnable {
         override fun run() {
             if (!isRunning) return
@@ -149,10 +183,12 @@ class KeepAwakeOverlayService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        isAlive = true
         settings = PluginSettingsManager(this)
         windowManager = getSystemService(WindowManager::class.java)
         notificationManager = getSystemService(NotificationManager::class.java)
         createNotificationChannel()
+        StatusBarIconPolicy.register(this, iconPolicyReceiver)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -170,7 +206,9 @@ class KeepAwakeOverlayService : Service() {
                 if (isRunning) {
                     applyRuntimeSettings()
                 } else {
-                    publishStatus()
+                    // Servis yaşıyorsa ama başlatılmadıysa ayarları uygula;
+                    // aksi halde sadece durum yayınlamak ekranı açık tutmuyor.
+                    startKeepingAwakeFromPrefs()
                 }
             }
 
@@ -190,7 +228,9 @@ class KeepAwakeOverlayService : Service() {
     }
 
     override fun onDestroy() {
+        isAlive = false
         cleanup()
+        StatusBarIconPolicy.unregister(this, iconPolicyReceiver)
         super.onDestroy()
     }
 
@@ -222,6 +262,8 @@ class KeepAwakeOverlayService : Service() {
         isRunning = true
         settings.putBoolean(KeepAwakeKeys.PLUGIN_ID, KeepAwakeKeys.SERVICE_RUNNING, true)
 
+        // Ekran kilidi yalnızca overlay gerçekten eklendiğinde alınır;
+        // uygulama bazlı modda seçili uygulama yoksa ekran açık kalmaz.
         handler.removeCallbacks(timerTick)
         handler.removeCallbacks(monitorTick)
 
@@ -324,6 +366,7 @@ class KeepAwakeOverlayService : Service() {
     private fun abortStart() {
         isRunning = false
         settings.putBoolean(KeepAwakeKeys.PLUGIN_ID, KeepAwakeKeys.SERVICE_RUNNING, false)
+        releaseWakeLock()
         publishStatus()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
@@ -339,6 +382,7 @@ class KeepAwakeOverlayService : Service() {
         handler.removeCallbacks(monitorTick)
         monitoringActive = false
         hideOverlay()
+        releaseWakeLock()
         isRunning = false
         timerEndTime = 0L
         if (::settings.isInitialized) {
@@ -459,12 +503,15 @@ class KeepAwakeOverlayService : Service() {
     private fun acquireWakeLock() {
         if (wakeLock?.isHeld == true) return
         val powerManager = getSystemService(PowerManager::class.java) ?: return
-        wakeLock = powerManager
-            .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Atolye::KeepAwake")
-            .apply {
-                setReferenceCounted(false)
-                acquire()
-            }
+        // PARTIAL_WAKE_LOCK yalnızca CPU'yu açık tutar; ekran yine 30 sn'de
+        // kapanır. Ekranın gerçekten açık kalması için ekran kilidi gerekli.
+        val level = PowerManager.SCREEN_BRIGHT_WAKE_LOCK or
+            PowerManager.ACQUIRE_CAUSES_WAKEUP
+        val lock = powerManager
+            .newWakeLock(level, "Atolye::KeepAwake:Screen")
+            .apply { setReferenceCounted(false) }
+        runCatching { lock.acquire() }
+        wakeLock = lock
     }
 
     private fun releaseWakeLock() {
@@ -483,11 +530,15 @@ class KeepAwakeOverlayService : Service() {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 getString(R.string.keepawake_channel_name),
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = getString(R.string.keepawake_channel_desc)
                 setShowBadge(false)
+                setSound(null, null)
+                enableVibration(false)
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             }
+            notificationManager?.deleteNotificationChannel(LEGACY_CHANNEL_ID)
             notificationManager?.createNotificationChannel(channel)
         }
     }
@@ -560,12 +611,15 @@ class KeepAwakeOverlayService : Service() {
         }
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification_keepawake)
+            .setSmallIcon(StatusBarIconPolicy.smallIcon(this, R.drawable.ic_notification_keepawake))
             .setContentTitle(getString(R.string.keepawake_notification_title))
             .setContentText(text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setSortKey("100_atolye_keepawake")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setGroup("atolye_keepawake")
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setShowWhen(false)

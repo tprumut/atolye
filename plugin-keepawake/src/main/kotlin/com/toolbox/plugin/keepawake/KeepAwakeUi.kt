@@ -82,6 +82,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.atolye.design.AtolyeShapes
 import com.atolye.design.AtolyeTheme
+import com.atolye.design.AtolyeThemeStore
 import com.toolbox.plugin.PluginSettingsManager
 
 /** Keep Awake ayar anahtarları ve mod sabitleri. */
@@ -1096,7 +1097,9 @@ fun RequestNotificationPermission() {
 /** Eklenti içeriğini Atölye teması ile sarar. */
 @Composable
 fun KeepAwakeTheme(content: @Composable () -> Unit) {
-    AtolyeTheme {
+    val context = LocalContext.current
+    val themeType = remember(context) { AtolyeThemeStore.read(context) }
+    AtolyeTheme(themeType = themeType) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background,

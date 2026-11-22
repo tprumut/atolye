@@ -6,6 +6,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -24,12 +25,14 @@ import androidx.core.content.ContextCompat
 import com.toolbox.contract.PluginContract
 import com.toolbox.plugin.PluginSettingsManager
 import com.toolbox.plugin.PluginStatusPublisher
+import com.toolbox.plugin.StatusBarIconPolicy
 import java.util.concurrent.TimeUnit
 
 class UykucuTimerService : Service() {
 
     companion object {
-        const val CHANNEL_ID = "uykucu_timer_channel"
+        const val CHANNEL_ID = "uykucu_timer_channel_v2"
+        const val LEGACY_CHANNEL_ID = "uykucu_timer_channel"
         const val WARNING_CHANNEL_ID = "uykucu_warning_channel"
         const val NOTIFICATION_ID = 3001
         const val WARNING_NOTIFICATION_ID = 3002
@@ -51,13 +54,19 @@ class UykucuTimerService : Service() {
         }
 
         fun cancel(context: Context) {
+            // ACTION_CANCEL servisi hemen stopSelf() ile kapatır; startForeground()
+            // çağrılmaz. Bu yüzden startForegroundService() kullanılmamalı, aksi
+            // halde sistem "did not then call startForeground()" hatası verir.
             val i = Intent(context, UykucuTimerService::class.java).setAction(ACTION_CANCEL)
-            ContextCompat.startForegroundService(context, i)
+            context.startService(i)
         }
 
         fun extend(context: Context) {
+            // Aynı nedenle normal startService kullanılır. Servis zaten foreground
+            // durumdaysa intent mevcut servise iletilir; değilse extendTimer()
+            // çalışmayıp servis kapanır.
             val i = Intent(context, UykucuTimerService::class.java).setAction(ACTION_EXTEND)
-            ContextCompat.startForegroundService(context, i)
+            context.startService(i)
         }
     }
 
@@ -71,6 +80,12 @@ class UykucuTimerService : Service() {
     private var endTimeMs: Long = 0L
     private var finishing = false
     private var foregroundStarted = false
+
+    private val iconPolicyReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (isRunning) updateNotification()
+        }
+    }
 
     private val tick = object : Runnable {
         override fun run() {
@@ -92,6 +107,7 @@ class UykucuTimerService : Service() {
         notificationManager = getSystemService(NotificationManager::class.java)
         alarmManager = getSystemService(AlarmManager::class.java)
         createChannel()
+        StatusBarIconPolicy.register(this, iconPolicyReceiver)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -102,8 +118,17 @@ class UykucuTimerService : Service() {
             }
             ACTION_CANCEL -> cancelTimer()
             ACTION_EXTEND -> extendTimer()
-            ACTION_ALARM_WARNING -> showWarningIfNeeded()
-            ACTION_ALARM_FINISH -> handleFinish()
+            ACTION_ALARM_WARNING -> {
+                // Alarm alıcısı startForegroundService() ile başlatır; sistemin
+                // 5 saniyelik startForeground() zorunluluğunu karşılamak için
+                // bildirimi hemen göster.
+                ensureForegroundForAlarm()
+                showWarningIfNeeded()
+            }
+            ACTION_ALARM_FINISH -> {
+                ensureForegroundForAlarm()
+                handleFinish()
+            }
             ACTION_REFRESH -> if (isRunning) updateNotification() else restoreOrStop()
             else -> restoreOrStop()
         }
@@ -113,6 +138,7 @@ class UykucuTimerService : Service() {
     override fun onDestroy() {
         handler.removeCallbacks(tick)
         releaseWakeLock()
+        StatusBarIconPolicy.unregister(this, iconPolicyReceiver)
         super.onDestroy()
     }
 
@@ -178,7 +204,11 @@ class UykucuTimerService : Service() {
     }
 
     private fun extendTimer() {
-        if (!isRunning) return
+        if (!isRunning) {
+            // startService ile boşa başlatıldıysak hemen kapanalım.
+            stopForegroundClean()
+            return
+        }
         val now = System.currentTimeMillis()
         val base = maxOf(endTimeMs, now)
         endTimeMs = base + TimeUnit.MINUTES.toMillis(5)
@@ -353,10 +383,13 @@ class UykucuTimerService : Service() {
             val timer = NotificationChannel(
                 CHANNEL_ID,
                 getString(R.string.uykucu_channel_name),
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = getString(R.string.uykucu_channel_desc)
                 setShowBadge(false)
+                setSound(null, null)
+                enableVibration(false)
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             }
             val warn = NotificationChannel(
                 WARNING_CHANNEL_ID,
@@ -366,9 +399,19 @@ class UykucuTimerService : Service() {
                 description = getString(R.string.uykucu_channel_desc)
                 setShowBadge(true)
             }
+            notificationManager?.deleteNotificationChannel(LEGACY_CHANNEL_ID)
             notificationManager?.createNotificationChannel(timer)
             notificationManager?.createNotificationChannel(warn)
         }
+    }
+
+    private fun ensureForegroundForAlarm() {
+        // Süreç öldürülüp alarm servisi yeniden başlattıysa bitiş zamanı
+        // hafızada yoktur; kayıtlı durumdan geri yükle ki bildirim doğru görünsün.
+        if (endTimeMs <= 0L) {
+            endTimeMs = settings.getLong(UykucuKeys.PLUGIN_ID, UykucuKeys.TIMER_END_TIME, 0L)
+        }
+        ensureForeground()
     }
 
     private fun ensureForeground() {
@@ -419,15 +462,18 @@ class UykucuTimerService : Service() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification_uykucu)
+            .setSmallIcon(StatusBarIconPolicy.smallIcon(this, R.drawable.ic_notification_uykucu))
             .setContentTitle(getString(R.string.uykucu_notification_title))
             .setContentText(text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setSortKey("200_atolye_uykucu")
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setShowWhen(false)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setGroup("atolye_uykucu_timer")
             .setContentIntent(contentPi)
             .addAction(R.drawable.ic_extend, getString(R.string.uykucu_extend_5), extendPi)
             .addAction(R.drawable.ic_stop, getString(R.string.uykucu_cancel), cancelPi)
@@ -440,11 +486,12 @@ class UykucuTimerService : Service() {
         if (shown || !running) return
         if (UykucuPermissions.hasNotificationPermission(this)) {
             val n = NotificationCompat.Builder(this, WARNING_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_notification_uykucu)
+                .setSmallIcon(StatusBarIconPolicy.smallIcon(this, R.drawable.ic_notification_uykucu))
                 .setContentTitle(getString(R.string.uykucu_warning_title))
                 .setContentText(getString(R.string.uykucu_warning_text))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setGroup("atolye_uykucu_warning")
                 .setAutoCancel(true)
                 .setOnlyAlertOnce(true)
                 .build()

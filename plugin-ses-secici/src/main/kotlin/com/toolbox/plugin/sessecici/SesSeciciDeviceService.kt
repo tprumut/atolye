@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -19,11 +20,13 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.toolbox.plugin.PluginSettingsManager
 import com.toolbox.plugin.PluginStatusPublisher
+import com.toolbox.plugin.StatusBarIconPolicy
 
 class SesSeciciDeviceService : Service() {
 
     companion object {
-        const val CHANNEL_ID = "sessecici_channel"
+        const val CHANNEL_ID = "sessecici_channel_v2"
+        const val LEGACY_CHANNEL_ID = "sessecici_channel"
         const val NOTIF_ID = 4001
         const val ACTION_START = "com.toolbox.plugin.sessecici.START"
         const val ACTION_REFRESH = "com.toolbox.plugin.sessecici.REFRESH"
@@ -47,6 +50,12 @@ class SesSeciciDeviceService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private var fg = false
 
+    private val iconPolicyReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (fg) updateNotification()
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         settings = PluginSettingsManager(this)
@@ -54,6 +63,7 @@ class SesSeciciDeviceService : Service() {
         nm = getSystemService(NotificationManager::class.java)
         createChannel()
         registerCallback()
+        StatusBarIconPolicy.register(this, iconPolicyReceiver)
         ensureForegroundOrStop()
         publishState(true)
     }
@@ -74,6 +84,7 @@ class SesSeciciDeviceService : Service() {
     override fun onDestroy() {
         publishState(false)
         unregisterCallback()
+        StatusBarIconPolicy.unregister(this, iconPolicyReceiver)
         super.onDestroy()
     }
 
@@ -110,9 +121,13 @@ class SesSeciciDeviceService : Service() {
 
     private fun createChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val ch = NotificationChannel(CHANNEL_ID, getString(R.string.notification_channel_name), NotificationManager.IMPORTANCE_LOW)
+            val ch = NotificationChannel(CHANNEL_ID, getString(R.string.notification_channel_name), NotificationManager.IMPORTANCE_DEFAULT)
             ch.description = getString(R.string.notification_channel_desc)
             ch.setShowBadge(false)
+            ch.setSound(null, null)
+            ch.enableVibration(false)
+            ch.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            nm?.deleteNotificationChannel(LEGACY_CHANNEL_ID)
             nm?.createNotificationChannel(ch)
         }
     }
@@ -148,13 +163,16 @@ class SesSeciciDeviceService : Service() {
         val openIntent = Intent(this, SesSeciciPluginActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         val pi = PendingIntent.getActivity(this, 0, openIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification_sessecici)
+            .setSmallIcon(StatusBarIconPolicy.smallIcon(this, R.drawable.ic_notification_sessecici))
             .setContentTitle(getString(R.string.notification_title))
             .setContentText(getString(R.string.notification_text, current))
             .setContentIntent(pi)
+            .setSortKey("300_atolye_sessecici")
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setGroup("atolye_sessecici")
             .build()
     }
 

@@ -30,6 +30,8 @@
     <string name="plugin_open">Aç</string>
     <string name="plugin_settings">Eklenti ayarları</string>
     <string name="open_settings">Ayarlar</string>
+    <string name="settings_screen_title">Atölye Ayarları</string>
+    <string name="settings_select_plugin">Ayarları görüntülenecek eklenti</string>
     <string name="launch_failed">Eklenti açılamadı</string>
     <string name="settings_unavailable">Bu eklentinin ayar ekranı yok</string>
 

@@ -168,21 +168,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Uninstall plugin (for delete action)
-    fun uninstallPlugin(packageName: String): Boolean {
-        val uri = Uri.parse("package:$packageName")
-        val intent = Intent(Intent.ACTION_DELETE, uri).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        return try {
-            appContext.startActivity(intent)
-            true
-        } catch (e: Exception) {
-            _error.value = "Silme işlemi başlatılamadı: ${e.message}"
-            false
-        }
-    }
-
     fun isIgnoringBatteryOptimizations(): Boolean {
         val pm = appContext.getSystemService(PowerManager::class.java) ?: return true
         return pm.isIgnoringBatteryOptimizations(appContext.packageName)

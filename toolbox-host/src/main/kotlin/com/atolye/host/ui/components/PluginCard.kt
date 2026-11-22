@@ -83,7 +83,6 @@ fun PluginCard(
     onPowerClick: () -> Unit,
     onHideToggle: () -> Unit,
     onEditCard: () -> Unit,
-    onDeleteClick: () -> Unit,
     onQuickSettingChange: (key: String, value: String) -> Unit,
     onDragStart: (() -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -167,8 +166,7 @@ fun PluginCard(
             }
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .width(40.dp) // Ensure power button has space
+                    .width(44.dp) // Sabit genişlik: fillMaxWidth() burada metin kolonunu sıfırlıyor
             ) {
                 AtolyePowerButton(
                     running = running,
@@ -187,10 +185,6 @@ fun PluginCard(
                             onClick = { menuExpanded = false; onEditCard() }
                         )
                     }
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.card_delete)) },
-                        onClick = { menuExpanded = false; onDeleteClick() }
-                    )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.plugin_settings)) },
                         onClick = { menuExpanded = false; onCardClick() }

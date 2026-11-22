@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.AutoScroll" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/autoscroll_primary</item>
+        <item name="colorPrimaryDark">@color/autoscroll_primary_container</item>
+        <item name="colorAccent">@color/autoscroll_secondary</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>

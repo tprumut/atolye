@@ -5,18 +5,11 @@ import kotlinx.serialization.Serializable
 /**
  * Toolbox / Atölye Plugin Sözleşmesi - Version 3
  *
- * Her eklenti AndroidManifest.xml'inde `com.toolbox.PLUGIN` action'ı ile
- * kendini bildirir ve `com.toolbox.plugin.METADATA` meta-data'sında
- * `@xml/plugin_metadata` kaynağını gösterir.
+ * Eklentiler artık ayrı APK değil, Atölye'nin içinde derlenen kütüphane
+ * modülleridir. Keşif `PluginProvider` listesi üzerinden yapılır;
+ * `com.toolbox.PLUGIN` action'ı yalnızca Activity açma amacıyla kullanılır.
  *
- * Keşif: Ana uygulama PackageManager.queryIntentActivities() ile eklentileri
- * bulur, eklentinin kendi resource'larından metadata XML'ini okur ve
- * görünen metinleri eklentinin diline göre çözer.
- *
- * Not: Kaynak ID'leri APK'lar arasında paylaşılamaz. Bu yüzden metadata'da
- * resource *isimleri* taşınır, ID değil.
- *
- * v3: Ana uygulama ↔ eklenti kontrol kanalı (imza korumalı BroadcastReceiver),
+ * v3: Ana uygulama ↔ eklenti kontrol kanalı (BroadcastReceiver),
  * hızlı ayar (quick setting) metadata ve zengin durum yayını eklendi.
  * Hızlı ayarı olmayan/eski eklentiler geriye dönük uyumludur.
  */

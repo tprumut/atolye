@@ -3,8 +3,8 @@ package com.toolbox.plugin
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.toolbox.contract.PluginContract
 
 /**
@@ -77,8 +77,10 @@ object PluginStatusPublisher {
         remainingMs: Long = -1L,
         statusText: String? = null
     ) {
+        // Android 14 (targetSdk 34) paket hedefli sistem broadcast'lerinde
+        // ekstraları STRIPPED yapıyor. Eklentiler ve host aynı süreçte olduğu için
+        // durum yayını süreç içi LocalBroadcastManager ile gönderilir.
         val intent = Intent(PluginContract.ACTION_PLUGIN_STATUS).apply {
-            setPackage(context.packageName)
             putExtra(PluginContract.EXTRA_PLUGIN_ID, pluginId)
             putExtra(PluginContract.EXTRA_PLUGIN_RUNNING, running)
             putExtra(PluginContract.EXTRA_REMAINING_MS, remainingMs)
@@ -90,7 +92,7 @@ object PluginStatusPublisher {
             }
         }
         try {
-            context.sendBroadcast(intent)
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
         } catch (_: Exception) {
         }
     }

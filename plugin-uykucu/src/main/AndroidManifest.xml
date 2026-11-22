@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- İzinler host uygulamasının manifestine birleştirilir -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
         tools:targetApi="34" />
@@ -9,41 +10,17 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <!-- Host control channel -->
-    <permission
-        android:name="com.toolbox.permission.CONTROL_PLUGIN"
-        android:protectionLevel="signature" />
-    <uses-permission android:name="com.toolbox.permission.CONTROL_PLUGIN" />
-
-    <application
-        android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/plugin_uykucu_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.Uykucu"
-        tools:targetApi="34">
-
+    <application>
         <activity
             android:name=".UykucuPluginActivity"
-            android:exported="true"
+            android:exported="false"
             android:label="@string/plugin_uykucu_name"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.Uykucu">
-            <intent-filter>
-                <action android:name="com.toolbox.PLUGIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data
-                android:name="com.toolbox.plugin.METADATA"
-                android:resource="@xml/plugin_metadata" />
-        </activity>
+            android:theme="@style/Theme.Uykucu" />
 
         <activity
             android:name=".UykucuSettingsActivity"
-            android:exported="true"
+            android:exported="false"
             android:label="@string/uykucu_settings_title"
             android:parentActivityName=".UykucuPluginActivity"
             android:theme="@style/Theme.Uykucu" />
@@ -75,21 +52,14 @@
             android:name=".UykucuAlarmReceiver"
             android:exported="false" />
 
-        <!-- Host command receiver -->
         <receiver
             android:name=".UykucuCommandReceiver"
-            android:exported="true"
+            android:exported="false"
             android:permission="com.toolbox.permission.CONTROL_PLUGIN">
             <intent-filter>
                 <action android:name="com.toolbox.PLUGIN_COMMAND" />
             </intent-filter>
         </receiver>
-
     </application>
-
-    <queries>
-        <package android:name="com.atolye.host" />
-        <package android:name="com.atolye.host.debug" />
-    </queries>
 
 </manifest>

@@ -46,7 +46,7 @@ class SpeedMeterCommandReceiver : BasePluginCommandReceiver() {
             val running = runningOverride ?: settings.getBoolean(SpeedMeterKeys.PLUGIN_ID, SpeedMeterKeys.SERVICE_RUNNING, false)
             val qs = mapOf(
                 SpeedMeterKeys.NETWORK_MODE to settings.getInt(SpeedMeterKeys.PLUGIN_ID, SpeedMeterKeys.NETWORK_MODE, 0).toString(),
-                SpeedMeterKeys.UNIT to settings.getInt(SpeedMeterKeys.PLUGIN_ID, SpeedMeterKeys.UNIT, 0).toString(),
+                SpeedMeterKeys.UNIT to settings.getInt(SpeedMeterKeys.PLUGIN_ID, SpeedMeterKeys.UNIT, 2).toString(),
                 SpeedMeterKeys.AUTOSTART to settings.getBoolean(SpeedMeterKeys.PLUGIN_ID, SpeedMeterKeys.AUTOSTART, true).toString()
             )
             PluginStatusPublisher.publish(

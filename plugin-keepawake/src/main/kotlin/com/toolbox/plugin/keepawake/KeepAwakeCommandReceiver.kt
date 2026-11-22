@@ -38,14 +38,21 @@ class KeepAwakeCommandReceiver : BasePluginCommandReceiver() {
 
     override fun onSetQuickSetting(context: Context, key: String, value: String) {
         val settings = PluginSettingsManager(context)
+        var shouldEnsureRunning = false
         when (key) {
             KeepAwakeKeys.MODE, "mode" -> {
                 val v = value.toIntOrNull() ?: return
                 settings.putInt(pluginId, KeepAwakeKeys.MODE, v)
+                shouldEnsureRunning = true
             }
             KeepAwakeKeys.TIMER_DURATION, "timer_duration", "duration" -> {
                 val v = value.toIntOrNull() ?: return
                 settings.putInt(pluginId, KeepAwakeKeys.TIMER_DURATION, v)
+                // Süre seçimi, "süreli mod" anlamına gelir. Daha önce yalnızca
+                // timer_duration yazıldığı için mod süresiz (2) kalıyor, servis
+                // hiç başlamıyordu ve ekran kapanıyordu.
+                settings.putInt(pluginId, KeepAwakeKeys.MODE, KeepAwakeKeys.MODE_TIMER)
+                shouldEnsureRunning = true
             }
             KeepAwakeKeys.SHOW_NOTIFICATION, "show_notification", "notification" -> {
                 val b = value == "true" || value == "1"
@@ -55,8 +62,11 @@ class KeepAwakeCommandReceiver : BasePluginCommandReceiver() {
                 settings.putString(pluginId, key, value)
             }
         }
-        // Çalışıyorsa servise anında uygulat
-        KeepAwakeOverlayService.applySettings(context)
+        if (shouldEnsureRunning) {
+            KeepAwakeOverlayService.ensureRunning(context)
+        } else {
+            KeepAwakeOverlayService.applySettings(context)
+        }
         KeepAwakeOverlayService.publishCurrentStatus(context)
     }
 }

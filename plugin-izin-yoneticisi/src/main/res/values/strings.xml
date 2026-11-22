@@ -1,0 +1,33 @@
+<resources>
+    <string name="plugin_izin_name">İzin Yöneticisi</string>
+    <string name="plugin_izin_desc">Hangi uygulamaya hangi izni verdiğini tek ekranda, okunabilir biçimde gösterir.</string>
+    <string name="izin_settings_title">İzin Yöneticisi Ayarları</string>
+
+    <string name="izin_search_hint">Uygulama, paket veya izin ara</string>
+    <string name="izin_only_granted">Sadece verilenler</string>
+    <string name="izin_include_system">Sistem uygulamaları</string>
+    <string name="izin_app_count">%1$d uygulama</string>
+    <string name="izin_granted_summary">%1$d / %2$d izin verildi</string>
+    <string name="izin_no_apps">Eşleşen uygulama bulunamadı.</string>
+    <string name="izin_loading">İzinler okunuyor…</string>
+    <string name="izin_granted">Verildi</string>
+    <string name="izin_denied">Verilmedi</string>
+    <string name="izin_show_all">Tüm izinleri göster</string>
+    <string name="izin_show_less">Daha az göster</string>
+    <string name="izin_system_app">Sistem</string>
+    <string name="izin_read_only">Salt okunur</string>
+    <string name="izin_refresh">Yenile</string>
+    <string name="izin_settings">Ayarlar</string>
+    <string name="izin_back">Geri</string>
+
+    <string name="izin_section_filters">Liste filtreleri</string>
+    <string name="izin_section_filters_desc">Listelenen uygulamaları ve izinleri daraltır.</string>
+    <string name="izin_only_granted_desc">İzni verilmemiş maddeler gizlenir.</string>
+    <string name="izin_include_system_desc">Sistem ve güncellenmiş sistem uygulamaları da gösterilir.</string>
+
+    <string name="izin_note_title">Kapsam</string>
+    <string name="izin_note">Bu ekran Android PackageManager izin kayıtlarını okur. Erişilebilirlik, diğer uygulamaların üstünde göster ve kullanım erişimi gibi özel yetkiler Android Ayarları içinde yönetilir.</string>
+
+    <string name="izin_permission_query_title">Tüm uygulamaları görüntüleme</string>
+    <string name="izin_permission_query_desc">Cihazdaki uygulamaların izin listelerini okumak için gereklidir.</string>
+</resources>

@@ -1,8 +1,9 @@
 package com.atolye.host
 
 import android.app.Application
-import android.content.Context
+import com.atolye.design.AtolyeThemeStore
 import com.atolye.design.AtolyeThemeType
+import com.atolye.host.plugins.BuiltInPlugins
 import com.toolbox.plugin.PluginDiscovery
 import com.toolbox.plugin.PluginSettingsManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,13 +19,9 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 class AtolyeApplication : Application() {
 
-    val pluginDiscovery: PluginDiscovery by lazy { PluginDiscovery(this) }
+    val pluginDiscovery: PluginDiscovery by lazy { PluginDiscovery(this, BuiltInPlugins.all) }
 
     val pluginSettings: PluginSettingsManager by lazy { PluginSettingsManager(this) }
-
-    private val hostPreferences by lazy {
-        getSharedPreferences("host_settings", Context.MODE_PRIVATE)
-    }
 
     private val _theme = MutableStateFlow(AtolyeThemeType.KAGIT)
 
@@ -44,7 +41,9 @@ class AtolyeApplication : Application() {
     }
 
     fun setTheme(themeType: AtolyeThemeType) {
-        hostPreferences.edit().putString(KEY_THEME, themeType.name).apply()
+        // Eklenti Activity'leri de aynı dosyayı okuduğu için tema tüm sayfalarda
+        // birlikte değişir.
+        AtolyeThemeStore.save(this, themeType)
         _theme.value = themeType
     }
 
@@ -61,13 +60,5 @@ class AtolyeApplication : Application() {
         return nextTheme
     }
 
-    private fun loadTheme(): AtolyeThemeType {
-        val stored = hostPreferences.getString(KEY_THEME, AtolyeThemeType.KAGIT.name)
-        return runCatching { AtolyeThemeType.valueOf(stored ?: "") }
-            .getOrDefault(AtolyeThemeType.KAGIT)
-    }
-
-    companion object {
-        private const val KEY_THEME = "theme"
-    }
+    private fun loadTheme(): AtolyeThemeType = AtolyeThemeStore.read(this)
 }

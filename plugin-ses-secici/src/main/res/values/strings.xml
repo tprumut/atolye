@@ -38,7 +38,7 @@
     <string name="permission_modify_audio_title">Ses Ayarlarını Değiştirme</string>
     <string name="permission_modify_audio_desc">Ses seviyesi ve çıkış yönlendirmesini yönetmek için gereklidir.</string>
     <string name="permission_post_notifications_title">Bildirim İzni</string>
-    <string name="permission_post_notifications_desc">Kalıcı bildirim ve hızlı geçiş için (Android 13+).</string>
+    <string name="sessecici_permission_post_notifications_desc">Kalıcı bildirim ve hızlı geçiş için (Android 13+).</string>
     <string name="permission_bluetooth_connect_title">Bluetooth Bağlantı İzni</string>
     <string name="permission_bluetooth_connect_desc">Bluetooth ses cihazlarının adını/türünü doğru göstermek için (Android 12+).</string>
 

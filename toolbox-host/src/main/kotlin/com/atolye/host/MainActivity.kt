@@ -23,7 +23,10 @@ import com.atolye.design.AtolyeTheme
 import com.atolye.design.AtolyeThemeType
 import com.atolye.host.ui.MainScreen
 import com.atolye.host.ui.MainViewModel
-import com.atolye.host.ui.PluginDetailScreen
+import com.atolye.host.ui.PluginSettingsScreen
+import com.atolye.host.ui.PluginUiItem
+import com.toolbox.plugin.autoscroll.AutoScrollOverlayService
+import com.toolbox.plugin.keepawake.KeepAwakeOverlayService
 
 class MainActivity : ComponentActivity() {
 
@@ -32,6 +35,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val app = application as AtolyeApplication
+
+        // Yeniden kurulum/force-stop sonrası Uyanık servisi ölü kalmasın.
+        // Kayıtlı mod ve süre ile ekranı açık tutma servisi tekrar başlar.
+        KeepAwakeOverlayService.ensureRunning(this)
+        // Yüzen tuş yalnızca kaydırma hâlâ çalışıyorsa geri yüklenir.
+        AutoScrollOverlayService.ensureRunning(this)
 
         setContent {
             val themeType by app.theme.collectAsState()
@@ -62,37 +71,43 @@ private fun AtolyeApp(
     val app = context.applicationContext as AtolyeApplication
     val discovery = app.pluginDiscovery
 
-    var selectedPluginId by remember { mutableStateOf<String?>(null) }
-    val selectedItem = selectedPluginId?.let { id -> items.firstOrNull { it.plugin.metadata.pluginId == id } }
+    // Kart tıklaması doğrudan eklentiyi açar. Ayarlar düğmesi ise tüm
+    // eklentiler için paylaşılan tek ayar ekranını açar.
+    var settingsOpen by remember { mutableStateOf(false) }
+    var settingsPluginId by remember { mutableStateOf<String?>(null) }
 
-    if (selectedItem == null) {
-        if (selectedPluginId != null) selectedPluginId = null
+    val launchFailed = stringResource(R.string.launch_failed)
+    val settingsUnavailable = stringResource(R.string.settings_unavailable)
+
+    fun launch(item: PluginUiItem) {
+        if (!discovery.launchPlugin(item.plugin, from = context)) {
+            Toast.makeText(context, launchFailed, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    if (!settingsOpen) {
         MainScreen(
             themeType = themeType,
             onThemeChange = onThemeChange,
-            onPluginClick = { item -> selectedPluginId = item.plugin.metadata.pluginId },
+            onPluginClick = { item -> launch(item) },
+            onSettingsClick = { settingsOpen = true },
             viewModel = viewModel
         )
     } else {
-        BackHandler { selectedPluginId = null }
-        val launchFailed = stringResource(R.string.launch_failed)
-        val settingsUnavailable = stringResource(R.string.settings_unavailable)
-
-        PluginDetailScreen(
-            item = selectedItem,
-            onBack = { selectedPluginId = null },
-            onLaunch = {
-                if (!discovery.launchPlugin(selectedItem.plugin, from = context)) {
-                    Toast.makeText(context, launchFailed, Toast.LENGTH_SHORT).show()
-                }
-            },
-            onSettings = {
-                if (!discovery.openPluginSettings(selectedItem.plugin, from = context)) {
+        BackHandler { settingsOpen = false }
+        PluginSettingsScreen(
+            items = items,
+            selectedId = settingsPluginId,
+            onSelect = { settingsPluginId = it },
+            onBack = { settingsOpen = false },
+            onLaunch = { item -> launch(item) },
+            onSettings = { item ->
+                if (!discovery.openPluginSettings(item.plugin, from = context)) {
                     Toast.makeText(context, settingsUnavailable, Toast.LENGTH_SHORT).show()
                 }
             },
-            onPowerToggle = {
-                if (selectedItem.runtime.running) viewModel.sendStop(selectedItem) else viewModel.sendStart(selectedItem)
+            onPowerToggle = { item ->
+                if (item.runtime.running) viewModel.sendStop(item) else viewModel.sendStart(item)
             }
         )
     }

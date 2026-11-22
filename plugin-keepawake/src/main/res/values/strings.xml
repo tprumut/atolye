@@ -59,9 +59,9 @@
     <string name="permission_usage_stats_title">Kullanım İstatistikleri</string>
     <string name="permission_usage_stats_desc">Ön plandaki uygulamayı tespit etmek için (uygulama bazlı mod)</string>
     <string name="permission_foreground_service_title">Ön Plan Servisi</string>
-    <string name="permission_foreground_service_desc">Bildirimde durum gösterimi için</string>
+    <string name="keepawake_permission_foreground_service_desc">Bildirimde durum gösterimi için</string>
     <string name="permission_post_notifications_title">Bildirim İzni</string>
-    <string name="permission_post_notifications_desc">Ekran açık tutulurken durumu bildirmek için (Android 13+)</string>
+    <string name="keepawake_permission_post_notifications_desc">Ekran açık tutulurken durumu bildirmek için (Android 13+)</string>
     <string name="usage_stats_permission_needed">Kullanım istatistikleri izni gerekli</string>
     <string name="open_overlay_settings">Ayarları Aç</string>
 

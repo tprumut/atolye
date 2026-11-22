@@ -59,6 +59,14 @@ dependencies {
     implementation(project(":toolbox-contract"))
     implementation(project(":toolbox-plugin-base"))
 
+    // Eklentiler ayrı APK değil, Atölye'nin içinde derlenen modüllerdir.
+    implementation(project(":plugin-speedmeter"))
+    implementation(project(":plugin-keepawake"))
+    implementation(project(":plugin-uykucu"))
+    implementation(project(":plugin-ses-secici"))
+    implementation(project(":plugin-izin-yoneticisi"))
+    implementation(project(":plugin-auto-scroll"))
+
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.2")

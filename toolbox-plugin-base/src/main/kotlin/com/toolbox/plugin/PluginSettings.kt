@@ -75,8 +75,24 @@ class PluginSettingsManager(context: Context) {
     // Boolean
     // ------------------------------------------------------------------
 
-    fun getBoolean(pluginId: String, key: String, default: Boolean = false): Boolean =
-        prefs(pluginId).getBoolean(key, default)
+    /**
+     * Hızlı ayarlar host tarafından metin olarak yazılabildiği için tip
+     * dönüşümünü toleranslı yapıyoruz; aksi halde getBoolean ClassCastException
+     * fırlatıp servisi çökertiyordu.
+     */
+    fun getBoolean(pluginId: String, key: String, default: Boolean = false): Boolean {
+        val p = prefs(pluginId)
+        return try {
+            p.getBoolean(key, default)
+        } catch (_: ClassCastException) {
+            when (val v = p.all[key]) {
+                is Boolean -> v
+                is String -> v.equals("true", ignoreCase = true) || v == "1"
+                is Number -> v.toInt() != 0
+                else -> default
+            }
+        }
+    }
 
     fun putBoolean(pluginId: String, key: String, value: Boolean) {
         prefs(pluginId).edit().putBoolean(key, value).apply()
@@ -95,8 +111,19 @@ class PluginSettingsManager(context: Context) {
     // Int
     // ------------------------------------------------------------------
 
-    fun getInt(pluginId: String, key: String, default: Int = 0): Int =
-        prefs(pluginId).getInt(key, default)
+    fun getInt(pluginId: String, key: String, default: Int = 0): Int {
+        val p = prefs(pluginId)
+        return try {
+            p.getInt(key, default)
+        } catch (_: ClassCastException) {
+            when (val v = p.all[key]) {
+                is Number -> v.toInt()
+                is String -> v.toIntOrNull() ?: default
+                is Boolean -> if (v) 1 else 0
+                else -> default
+            }
+        }
+    }
 
     fun putInt(pluginId: String, key: String, value: Int) {
         prefs(pluginId).edit().putInt(key, value).apply()
@@ -110,8 +137,18 @@ class PluginSettingsManager(context: Context) {
     // Long
     // ------------------------------------------------------------------
 
-    fun getLong(pluginId: String, key: String, default: Long = 0L): Long =
-        prefs(pluginId).getLong(key, default)
+    fun getLong(pluginId: String, key: String, default: Long = 0L): Long {
+        val p = prefs(pluginId)
+        return try {
+            p.getLong(key, default)
+        } catch (_: ClassCastException) {
+            when (val v = p.all[key]) {
+                is Number -> v.toLong()
+                is String -> v.toLongOrNull() ?: default
+                else -> default
+            }
+        }
+    }
 
     fun putLong(pluginId: String, key: String, value: Long) {
         prefs(pluginId).edit().putLong(key, value).apply()

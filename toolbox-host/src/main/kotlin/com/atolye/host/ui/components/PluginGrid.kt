@@ -15,9 +15,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.atolye.design.AtolyeShapes
 import com.atolye.host.R
 import com.atolye.host.ui.PluginUiItem
 
@@ -41,15 +38,16 @@ fun PluginGrid(
     onPowerClick: (PluginUiItem) -> Unit,
     onHideToggle: (PluginUiItem) -> Unit,
     onEditCard: (PluginUiItem) -> Unit,
-    onDeleteClick: (PluginUiItem) -> Unit,
     onQuickSettingChange: (PluginUiItem, String, String) -> Unit,
     onReorder: ((Int, Int) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        // Kartlarda hızlı ayar satırları ve durum metni olduğu için dar kolonlar
+        // içeriği kırpıyor. Eşikler yükseltildi: bu cihaz (941dp) artık 2 kolon.
         val columns = when {
-            maxWidth >= 840.dp -> 3
-            maxWidth >= 560.dp -> 2
+            maxWidth >= 1200.dp -> 3
+            maxWidth >= 640.dp -> 2
             else -> 1
         }
         LazyVerticalGrid(
@@ -59,7 +57,7 @@ fun PluginGrid(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(items, key = { it.plugin.packageName }) { item ->
+            items(items, key = { it.plugin.metadata.pluginId }) { item ->
                 val index = items.indexOf(item)
                 PluginCard(
                     item = item,
@@ -67,7 +65,6 @@ fun PluginGrid(
                     onPowerClick = { onPowerClick(item) },
                     onHideToggle = { onHideToggle(item) },
                     onEditCard = { onEditCard(item) },
-                    onDeleteClick = { onDeleteClick(item) },
                     onQuickSettingChange = { k, v -> onQuickSettingChange(item, k, v) },
                     onDragStart = onReorder?.let { reorder ->
                         { reorder(index, index) } // placeholder - actual drag logic in PluginCard
@@ -79,10 +76,7 @@ fun PluginGrid(
 }
 
 @Composable
-fun EmptyPluginsState(
-    onAddClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun EmptyPluginsState(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier.fillMaxSize().padding(24.dp),
         contentAlignment = Alignment.Center
@@ -99,10 +93,6 @@ fun EmptyPluginsState(
             }
             Text(stringResource(R.string.welcome_title), fontSize = 24.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
             Text(stringResource(R.string.welcome_description), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
-            Button(onClick = onAddClick, shape = AtolyeShapes.ButtonShape) {
-                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                Text(stringResource(R.string.browse_plugins), modifier = Modifier.padding(start = 8.dp))
-            }
         }
     }
 }

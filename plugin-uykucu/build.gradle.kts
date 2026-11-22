@@ -1,5 +1,5 @@
 plugins {
-    id("com.android.application")
+    id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("org.jetbrains.kotlin.plugin.compose")
@@ -10,11 +10,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.toolbox.plugin.uykucu"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -27,10 +23,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-        }
-        debug {
-            isDebuggable = true
-            applicationIdSuffix = ".debug"
         }
     }
 

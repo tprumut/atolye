@@ -11,6 +11,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -25,8 +27,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Palette
@@ -36,6 +37,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -81,7 +83,6 @@ import com.atolye.design.AtolyeShapes
 import com.atolye.design.AtolyeThemeType
 import com.atolye.host.AtolyeApplication
 import com.atolye.host.R
-import com.atolye.host.github.PluginBrowserBottomSheet
 import com.atolye.host.ui.components.EmptyPluginsState
 import com.atolye.host.ui.components.LoadingGrid
 import com.atolye.host.ui.components.PluginGrid
@@ -107,6 +108,7 @@ fun MainScreen(
     themeType: AtolyeThemeType,
     onThemeChange: (AtolyeThemeType) -> Unit,
     onPluginClick: (PluginUiItem) -> Unit,
+    onSettingsClick: () -> Unit,
     viewModel: MainViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -115,12 +117,9 @@ fun MainScreen(
     val error by viewModel.error.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
-    var showPluginBrowser by remember { mutableStateOf(false) }
     var showHidden by remember { mutableStateOf(false) }
     var editItem by remember { mutableStateOf<PluginUiItem?>(null) }
     var pendingStartItem by remember { mutableStateOf<PluginUiItem?>(null) }
-    // Delete confirmation dialog
-    var deleteConfirmItem by remember { mutableStateOf<PluginUiItem?>(null) }
 
     // AtolyeApplication instance for cycleTheme
     val app = context.applicationContext as AtolyeApplication
@@ -182,9 +181,9 @@ fun MainScreen(
                     hiddenCount = hiddenCount,
                     showHidden = showHidden,
                     onToggleHidden = { showHidden = !showHidden },
-                    onAddClick = { showPluginBrowser = true },
                     onThemeClick = { app.cycleTheme() },
-                    onRefreshClick = { viewModel.loadPlugins() }
+                    onRefreshClick = { viewModel.loadPlugins() },
+                    onSettingsClick = onSettingsClick
                 )
 
                 Row(
@@ -216,14 +215,13 @@ fun MainScreen(
 
                 when {
                     isLoading && items.isEmpty() -> LoadingGrid(modifier = Modifier.weight(1f))
-                    items.isEmpty() -> EmptyPluginsState(onAddClick = { showPluginBrowser = true }, modifier = Modifier.weight(1f))
+                    items.isEmpty() -> EmptyPluginsState(modifier = Modifier.weight(1f))
                     else -> PluginGrid(
                         items = visibleItems,
                         onPluginClick = onPluginClick,
                         onPowerClick = { tryTogglePower(it) },
                         onHideToggle = { viewModel.setPluginHidden(it.plugin.metadata.pluginId, !it.hidden) },
                         onEditCard = { editItem = it },
-                        onDeleteClick = { item -> deleteConfirmItem = item },
                         onQuickSettingChange = { item, k, v -> viewModel.setQuickSetting(item, k, v) },
                         modifier = Modifier.weight(1f),
                         onReorder = { fromIndex, toIndex ->
@@ -268,28 +266,6 @@ fun MainScreen(
             }
         )
     }
-    deleteConfirmItem?.let { item ->
-        AlertDialog(
-            onDismissRequest = { deleteConfirmItem = null },
-            title = { Text(stringResource(R.string.card_delete_title)) },
-            text = { Text(stringResource(R.string.card_delete_message, item.plugin.metadata.name)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.uninstallPlugin(item.plugin.packageName)
-                    deleteConfirmItem = null
-                }) { Text(stringResource(R.string.ok)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { deleteConfirmItem = null }) { Text(stringResource(R.string.cancel)) }
-            }
-        )
-    }
-    // Plugin browser bottom sheet
-    if (showPluginBrowser) {
-        PluginBrowserBottomSheet(
-            onDismiss = { showPluginBrowser = false }
-        )
-    }
 }
 
 @Composable
@@ -298,9 +274,9 @@ private fun HeaderSection(
     hiddenCount: Int,
     showHidden: Boolean,
     onToggleHidden: () -> Unit,
-    onAddClick: () -> Unit,
     onThemeClick: () -> Unit,
-    onRefreshClick: () -> Unit
+    onRefreshClick: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -328,8 +304,8 @@ private fun HeaderSection(
             CircleActionButton(onClick = onRefreshClick, contentDescription = stringResource(R.string.refresh)) {
                 Icon(Icons.Default.Refresh, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             }
-            CircleActionButton(onClick = onAddClick, contentDescription = "Eklenti ekle") {
-                Icon(Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            CircleActionButton(onClick = onSettingsClick, contentDescription = stringResource(R.string.open_settings)) {
+                Icon(Icons.Default.Settings, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             }
         }
     }
@@ -343,7 +319,7 @@ private fun CircleActionButton(onClick: () -> Unit, contentDescription: String, 
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick, onClickLabel = contentDescription),
         contentAlignment = Alignment.Center
     ) { content() }
 }
@@ -411,66 +387,137 @@ fun EditCardDialog(item: PluginUiItem, onDismiss: () -> Unit, onSave: (List<Stri
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Ana ekran sağ üstündeki ayarlar düğmesinden açılan ORTAK ayar ekranı.
+ *
+ * Kart tıklaması artık doğrudan eklentinin kendi ekranına gider; bu ekran
+ * tüm eklentiler için tek bir yapıdır. Üstteki seçiciden istenen eklenti
+ * seçilir, altında o eklentinin ortak bilgi/ayar bölümü gösterilir.
+ */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun PluginDetailScreen(
-    item: PluginUiItem,
+fun PluginSettingsScreen(
+    items: List<PluginUiItem>,
+    selectedId: String?,
+    onSelect: (String) -> Unit,
     onBack: () -> Unit,
-    onLaunch: () -> Unit,
-    onSettings: () -> Unit,
-    onPowerToggle: () -> Unit
+    onLaunch: (PluginUiItem) -> Unit,
+    onSettings: (PluginUiItem) -> Unit,
+    onPowerToggle: (PluginUiItem) -> Unit,
 ) {
-    val plugin = item.plugin
-    val metadata = plugin.metadata
-    val context = LocalContext.current
+    val selectedItem = items.firstOrNull { it.plugin.metadata.pluginId == selectedId }
+        ?: items.firstOrNull()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text(metadata.name, maxLines = 1, fontWeight = FontWeight.SemiBold) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back)) } },
-                actions = { IconButton(onClick = onSettings) { Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.plugin_settings)) } },
+                title = {
+                    Text(
+                        stringResource(R.string.settings_screen_title),
+                        maxLines = 1,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         }
     ) { paddingValues ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues).verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                AtolyePluginIcon(pluginId = metadata.pluginId, size = 64.dp)
-                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(metadata.name, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                    Text(categoryLabel(metadata.category), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(stringResource(R.string.version_format, metadata.version), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(if (item.runtime.running) stringResource(R.string.plugin_running) else stringResource(R.string.plugin_stopped), fontSize = 12.sp, color = if (item.runtime.running) Color(0xFF159764) else MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                text = stringResource(R.string.settings_select_plugin),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items.forEach { item ->
+                    FilterChip(
+                        selected = item.plugin.metadata.pluginId == selectedItem?.plugin?.metadata?.pluginId,
+                        onClick = { onSelect(item.plugin.metadata.pluginId) },
+                        label = { Text(item.plugin.metadata.name, fontSize = 12.sp) }
+                    )
                 }
             }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
 
-            Text(metadata.description, fontSize = 15.sp, lineHeight = 22.sp)
-
-            Button(onClick = onLaunch, modifier = Modifier.fillMaxWidth().height(50.dp), shape = AtolyeShapes.ButtonShape) {
-                Text(stringResource(R.string.open_plugin), fontWeight = FontWeight.Medium)
-            }
-            OutlinedButton(onClick = onPowerToggle, modifier = Modifier.fillMaxWidth().height(48.dp), shape = AtolyeShapes.ButtonShape) {
-                Text(if (item.runtime.running) stringResource(R.string.stop_action) else stringResource(R.string.start_action))
-            }
-            OutlinedButton(onClick = onSettings, modifier = Modifier.fillMaxWidth().height(48.dp), shape = AtolyeShapes.ButtonShape) {
-                Text(stringResource(R.string.plugin_settings))
-            }
-
-            ReliableWorkSection(pluginPackage = plugin.packageName)
-
-            Text(stringResource(R.string.required_permissions), fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
-            if (metadata.requiredPermissions.isEmpty()) {
-                Text(stringResource(R.string.no_permissions), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (selectedItem == null) {
+                Text(
+                    stringResource(R.string.no_plugins_installed),
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             } else {
-                metadata.requiredPermissions.forEach { PermissionRow(it) }
+                PluginSettingsContent(
+                    item = selectedItem,
+                    onLaunch = { onLaunch(selectedItem) },
+                    onSettings = { onSettings(selectedItem) },
+                    onPowerToggle = { onPowerToggle(selectedItem) }
+                )
             }
-            Text(stringResource(R.string.installed_version_format, plugin.installedVersion), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+    }
+}
+
+/** Tüm eklentiler için paylaşılan ayar/detay içeriği (Scaffold olmadan). */
+@Composable
+private fun PluginSettingsContent(
+    item: PluginUiItem,
+    onLaunch: () -> Unit,
+    onSettings: () -> Unit,
+    onPowerToggle: () -> Unit,
+) {
+    val plugin = item.plugin
+    val metadata = plugin.metadata
+
+    Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            AtolyePluginIcon(pluginId = metadata.pluginId, size = 64.dp)
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(metadata.name, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                Text(categoryLabel(metadata.category), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.version_format, metadata.version), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    if (item.runtime.running) stringResource(R.string.plugin_running) else stringResource(R.string.plugin_stopped),
+                    fontSize = 12.sp,
+                    color = if (item.runtime.running) Color(0xFF159764) else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        Text(metadata.description, fontSize = 15.sp, lineHeight = 22.sp)
+
+        Button(onClick = onLaunch, modifier = Modifier.fillMaxWidth().height(50.dp), shape = AtolyeShapes.ButtonShape) {
+            Text(stringResource(R.string.open_plugin), fontWeight = FontWeight.Medium)
+        }
+        OutlinedButton(onClick = onPowerToggle, modifier = Modifier.fillMaxWidth().height(48.dp), shape = AtolyeShapes.ButtonShape) {
+            Text(if (item.runtime.running) stringResource(R.string.stop_action) else stringResource(R.string.start_action))
+        }
+        OutlinedButton(onClick = onSettings, modifier = Modifier.fillMaxWidth().height(48.dp), shape = AtolyeShapes.ButtonShape) {
+            Text(stringResource(R.string.plugin_settings))
+        }
+
+        ReliableWorkSection(pluginPackage = plugin.packageName)
+
+        Text(stringResource(R.string.required_permissions), fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+        if (metadata.requiredPermissions.isEmpty()) {
+            Text(stringResource(R.string.no_permissions), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        } else {
+            metadata.requiredPermissions.forEach { PermissionRow(it) }
+        }
+        Text(stringResource(R.string.installed_version_format, plugin.installedVersion), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

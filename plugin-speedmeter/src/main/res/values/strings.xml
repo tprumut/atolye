@@ -1,11 +1,11 @@
 <resources>
     <!-- Plugin Info -->
-    <string name="plugin_speedmeter_name">İnternet Hızı Göstergesi</string>
+    <string name="plugin_speedmeter_name">Hız Göstergesi</string>
     <string name="plugin_speedmeter_desc">Durum çubuğunda anlık indirme/yükleme hızı, günlük/aylık veri kullanımı gösterir.</string>
     <string name="plugin_speedmeter_short">Hız Göstergesi</string>
 
     <!-- Settings -->
-    <string name="speedmeter_settings_title">İnternet Hızı Ayarları</string>
+    <string name="speedmeter_settings_title">Hız Göstergesi Ayarları</string>
     <string name="notification_settings">Bildirim Ayarları</string>
     <string name="network_settings">Ağ Ayarları</string>
     <string name="display_settings">Görünüm Ayarları</string>
@@ -54,7 +54,7 @@
 
     <!-- Permissions -->
     <string name="permission_foreground_service_title">Ön Plan Servisi</string>
-    <string name="permission_foreground_service_desc">Bildirimde hız gösterimi için sürekli çalışması gerekir</string>
+    <string name="speedmeter_permission_foreground_service_desc">Bildirimde hız gösterimi için sürekli çalışması gerekir</string>
     <string name="permission_foreground_data_sync_title">Veri Senkronizasyonu</string>
     <string name="permission_foreground_data_sync_desc">Arka planda veri kullanımını ölçmek için</string>
     <string name="permission_network_title">Ağ Erişimi</string>
@@ -62,12 +62,12 @@
     <string name="permission_receive_boot_title">Önyükleme Tamamlandı</string>
     <string name="permission_receive_boot_desc">Cihaz açılışında servisi otomatik başlatmak için</string>
     <string name="permission_post_notifications_title">Bildirim İzni</string>
-    <string name="permission_post_notifications_desc">Anlık hız bildirimi göstermek için (Android 13+)</string>
+    <string name="speedmeter_permission_post_notifications_desc">Anlık hız bildirimi göstermek için (Android 13+)</string>
 
     <!-- Service / notification -->
     <string name="service_start">Ölçümü Başlat</string>
     <string name="stop_service">Durdur</string>
-    <string name="speedmeter_channel_name">İnternet Hızı Göstergesi</string>
+    <string name="speedmeter_channel_name">Hız Göstergesi</string>
     <string name="speedmeter_channel_desc">Anlık indirme ve yükleme hızını gösterir</string>
     <string name="speedmeter_notification_download">↓ %1$s</string>
     <string name="speedmeter_notification_upload">↑ %1$s</string>

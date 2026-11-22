@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Tüm kurulu uygulamaların izinlerini okumak için gereklidir. -->
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="PackageVisibilityPolicy" />
+
+    <application>
+        <activity
+            android:name=".IzinPluginActivity"
+            android:exported="false"
+            android:label="@string/plugin_izin_name"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.IzinYoneticisi" />
+
+        <activity
+            android:name=".IzinSettingsActivity"
+            android:exported="false"
+            android:label="@string/izin_settings_title"
+            android:parentActivityName=".IzinPluginActivity"
+            android:theme="@style/Theme.IzinYoneticisi" />
+
+        <receiver
+            android:name=".IzinCommandReceiver"
+            android:exported="false"
+            android:permission="com.toolbox.permission.CONTROL_PLUGIN">
+            <intent-filter>
+                <action android:name="com.toolbox.PLUGIN_COMMAND" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- İzinler host uygulamasının manifestine birleştirilir -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
+        tools:targetApi="34" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <application>
+        <activity
+            android:name=".AutoScrollPluginActivity"
+            android:exported="false"
+            android:label="@string/plugin_autoscroll_name"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.AutoScroll" />
+
+        <activity
+            android:name=".AutoScrollSettingsActivity"
+            android:exported="false"
+            android:label="@string/autoscroll_settings_title"
+            android:parentActivityName=".AutoScrollPluginActivity"
+            android:theme="@style/Theme.AutoScroll" />
+
+        <service
+            android:name=".AutoScrollService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse"
+            android:stopWithTask="false">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Periodic page scroll gestures in the active app" />
+        </service>
+
+        <service
+            android:name=".AutoScrollOverlayService"
+            android:exported="false"
+            android:stopWithTask="false" />
+
+        <service
+            android:name=".AutoScrollAccessibilityService"
+            android:exported="false"
+            android:label="@string/plugin_autoscroll_name"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config_autoscroll" />
+        </service>
+
+        <receiver
+            android:name=".AutoScrollCommandReceiver"
+            android:exported="false"
+            android:permission="com.toolbox.permission.CONTROL_PLUGIN">
+            <intent-filter>
+                <action android:name="com.toolbox.PLUGIN_COMMAND" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>

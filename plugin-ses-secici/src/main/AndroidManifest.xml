@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- İzinler host uygulamasının manifestine birleştirilir -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
         tools:targetApi="34" />
@@ -11,41 +12,17 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <!-- Host control channel -->
-    <permission
-        android:name="com.toolbox.permission.CONTROL_PLUGIN"
-        android:protectionLevel="signature" />
-    <uses-permission android:name="com.toolbox.permission.CONTROL_PLUGIN" />
-
-    <application
-        android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/plugin_sessecici_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.SesSecici"
-        tools:targetApi="34">
-
+    <application>
         <activity
             android:name=".SesSeciciPluginActivity"
-            android:exported="true"
+            android:exported="false"
             android:label="@string/plugin_sessecici_name"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.SesSecici">
-            <intent-filter>
-                <action android:name="com.toolbox.PLUGIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data
-                android:name="com.toolbox.plugin.METADATA"
-                android:resource="@xml/plugin_metadata" />
-        </activity>
+            android:theme="@style/Theme.SesSecici" />
 
         <activity
             android:name=".SesSeciciSettingsActivity"
-            android:exported="true"
+            android:exported="false"
             android:label="@string/sessecici_settings_title"
             android:parentActivityName=".SesSeciciPluginActivity"
             android:theme="@style/Theme.SesSecici" />
@@ -84,21 +61,14 @@
             android:name=".SesSeciciActionReceiver"
             android:exported="false" />
 
-        <!-- Host command receiver -->
         <receiver
             android:name=".SesSeciciCommandReceiver"
-            android:exported="true"
+            android:exported="false"
             android:permission="com.toolbox.permission.CONTROL_PLUGIN">
             <intent-filter>
                 <action android:name="com.toolbox.PLUGIN_COMMAND" />
             </intent-filter>
         </receiver>
-
     </application>
-
-    <queries>
-        <package android:name="com.atolye.host" />
-        <package android:name="com.atolye.host.debug" />
-    </queries>
 
 </manifest>

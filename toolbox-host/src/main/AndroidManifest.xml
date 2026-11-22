@@ -36,16 +36,9 @@
             </intent-filter>
         </activity>
 
-        <!-- Plugin discovery doesn't need additional components -->
-        <!-- Plugins are separate APKs with their own manifests -->
+        <!-- Eklenti Activity/servis/alıcıları kütüphane modüllerinden birleştirilir. -->
+        <!-- Harici APK keşfi kullanılmadığı için ek <queries> tanımına gerek yok. -->
 
     </application>
-
-    <!-- Query all plugins that declare the PLUGIN intent -->
-    <queries>
-        <intent>
-            <action android:name="com.toolbox.PLUGIN" />
-        </intent>
-    </queries>
 
 </manifest>

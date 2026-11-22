@@ -3,51 +3,51 @@ package com.toolbox.plugin.speedmeter
 import java.util.Locale
 
 /**
- * Hız ve veri boyutu biçimlendirme yardımcıları.
+ * Hız Göstergesi biçimlendirmesi.
  *
- * Hem arayüz hem de servis tarafından kullanılır; bu yüzden tek bir
- * yerde tutulur ve yinelenen üst düzey fonksiyon adları oluşmaz.
+ * - durum çubuğu: sol üstte saat boyutunda `0,1 MB/s` (overlay)
+ * - bildirim paneli: `Aktif hız: 0,1 MB/s` + günlük/aylık veri
+ *
+ * Birim daima MB/s'dir; KB/s ve otomatik mod kaldırılmıştır.
  */
 object SpeedMeterFormat {
 
-    /** 0 = otomatik, 1 = KB/s, 2 = MB/s */
-    fun speed(bytesPerSecond: Long, unitMode: Int): String = when (unitMode) {
-        1 -> "${bytesPerSecond / 1024} KB/s"
-        2 -> String.format(Locale.getDefault(), "%.2f MB/s", bytesPerSecond / (1024.0 * 1024.0))
-        else -> when {
-            bytesPerSecond < 1024 -> "$bytesPerSecond B/s"
-            bytesPerSecond < 1024 * 1024 -> "${bytesPerSecond / 1024} KB/s"
-            else -> String.format(
-                Locale.getDefault(),
-                "%.2f MB/s",
-                bytesPerSecond / (1024.0 * 1024.0)
-            )
-        }
+    /** `0`, `0,1`, `0,2`, `1,3` ... */
+    private fun mbValue(bytesPerSecond: Long): String {
+        if (bytesPerSecond <= 0L) return "0"
+        val mb = bytesPerSecond / (1024.0 * 1024.0)
+        // Gerçek trafik çoğu zaman 0,1 MB/s'nin altında kalır.
+        // Sıfırda kilitlenmemesi için herhangi bir hareket en az 0,1 gösterilir.
+        if (mb < 0.1) return "0,1"
+        return String.format(Locale.getDefault(), "%.1f", mb)
     }
 
-    /** Bildirimde kullanılan kısa biçim. */
-    fun speedShort(bytesPerSecond: Long, unitMode: Int): String = when (unitMode) {
-        1 -> "${bytesPerSecond / 1024}K"
-        2 -> String.format(Locale.getDefault(), "%.1fM", bytesPerSecond / (1024.0 * 1024.0))
-        else -> when {
-            bytesPerSecond < 1024 -> "$bytesPerSecond"
-            bytesPerSecond < 1024 * 1024 -> "${bytesPerSecond / 1024}K"
-            else -> String.format(
-                Locale.getDefault(),
-                "%.1fM",
-                bytesPerSecond / (1024.0 * 1024.0)
-            )
-        }
+    /** Tek hız, panel/ayar ekranı için: `0,1 MB/s`. */
+    fun speed(bytesPerSecond: Long, unitMode: Int): String =
+        "${value(bytesPerSecond, unitMode)} ${unit(unitMode)}"
+
+    /**
+     * Panel başlığı: aktif internet hızı tek değer olarak.
+     * İndirme + yükleme toplanır. Örn. `Aktif hız: 0,2 MB/s`.
+     */
+    fun activeSpeed(download: Long, upload: Long, unitMode: Int): String =
+        "Aktif hız: ${value(download + upload, unitMode)} ${unit(unitMode)}"
+
+    private fun value(bytesPerSecond: Long, unitMode: Int): String = when (unitMode) {
+        1 -> "${bytesPerSecond / 1024}"
+        else -> mbValue(bytesPerSecond)
     }
 
-    /** 0 = otomatik, 1 = KB, 2 = MB */
+    private fun unit(unitMode: Int): String = if (unitMode == 1) "KB/s" else "MB/s"
+
+    /** Veri miktarı: `1,25 MB` veya `0,82 GB`. */
     fun data(bytes: Long, unitMode: Int): String = when (unitMode) {
         1 -> "${bytes / 1024} KB"
         2 -> String.format(Locale.getDefault(), "%.2f MB", bytes / (1024.0 * 1024.0))
         else -> when {
             bytes < 1024 -> "$bytes B"
-            bytes < 1024 * 1024 -> "${bytes / 1024} KB"
-            bytes < 1024L * 1024 * 1024 -> String.format(
+            bytes < 1024L * 1024L -> "${bytes / 1024} KB"
+            bytes < 1024L * 1024L * 1024L -> String.format(
                 Locale.getDefault(),
                 "%.2f MB",
                 bytes / (1024.0 * 1024.0)

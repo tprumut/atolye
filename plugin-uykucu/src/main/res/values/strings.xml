@@ -38,9 +38,9 @@
     <string name="permission_accessibility_title">Erişilebilirlik Servisi</string>
     <string name="permission_accessibility_desc">Ekranı kilitlemek ve uygulamaları kapatma adımlarını denemek için gereklidir.</string>
     <string name="permission_foreground_service_title">Ön Plan Servisi</string>
-    <string name="permission_foreground_service_desc">Geri sayımın arka planda güvenilir çalışması için gereklidir.</string>
+    <string name="uykucu_permission_foreground_service_desc">Geri sayımın arka planda güvenilir çalışması için gereklidir.</string>
     <string name="permission_post_notifications_title">Bildirim İzni</string>
-    <string name="permission_post_notifications_desc">Kalan süre ve uyarı bildirimlerini göstermek için (Android 13+).</string>
+    <string name="uykucu_permission_post_notifications_desc">Kalan süre ve uyarı bildirimlerini göstermek için (Android 13+).</string>
     <string name="permission_exact_alarm_title">Kesin Alarm İzni</string>
     <string name="permission_exact_alarm_desc">Ekran kapalıyken bile sürenin doğru bitmesi için gereklidir.</string>
 

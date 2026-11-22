@@ -1,0 +1,94 @@
+<resources>
+    <string name="plugin_autoscroll_name">Otomatik Kaydırma</string>
+    <string name="plugin_autoscroll_desc">Aktif uygulamada belli aralıklarla sayfa kaydırma hareketi gönderir; video oynatmaz.</string>
+    <string name="autoscroll_settings_title">Otomatik Kaydırma Ayarları</string>
+
+    <string name="auto_notification_channel_name">Otomatik Kaydırma</string>
+    <string name="auto_notification_channel_desc">Sayfa kaydırma durumu ve durdurma kısayolu</string>
+    <string name="auto_notification_title">Otomatik kaydırma açık</string>
+    <string name="auto_notification_text">%1$s • %2$s</string>
+    <string name="auto_notification_action_stop">Durdur</string>
+
+    <string name="accessibility_service_description">X, Reddit, Instagram gibi uygulamalarda akışı kaydırmak için dokunmatik kaydırma hareketi gönderir. Video oynatmaz.</string>
+
+    <string name="auto_status_ready">Hazır</string>
+    <string name="auto_status_running">Kaydırma etkin</string>
+    <string name="auto_status_stopped">Durdu</string>
+    <string name="auto_accessibility_enabled">Erişilebilirlik açık</string>
+    <string name="auto_accessibility_disabled">Erişilebilirlik kapalı</string>
+    <string name="auto_notification_permission">Bildirim izni: %1$s</string>
+    <string name="auto_granted">Verildi</string>
+    <string name="auto_not_granted">Verilmedi</string>
+    <string name="auto_current_app">Aktif uygulama: %1$s</string>
+    <string name="auto_current_app_unknown">Aktif uygulama algılanmadı</string>
+    <string name="auto_last_result">Son hareket: %1$s</string>
+    <string name="auto_result_sent">Gönderildi</string>
+    <string name="auto_result_not_connected">Erişilebilirlik servisi bağlı değil • durduruldu</string>
+    <string name="auto_result_blocked">Bu ekranda kaydırma atlandı</string>
+    <string name="auto_result_failed">Hareket gönderilemedi</string>
+
+    <string name="auto_start">Başlat</string>
+    <string name="auto_stop">Durdur</string>
+    <string name="auto_toggle_on">Açık</string>
+    <string name="auto_toggle_off">Kapalı</string>
+    <string name="auto_open_accessibility">Erişilebilirlik ayarlarını aç</string>
+    <string name="auto_settings">Ayarlar</string>
+    <string name="auto_back">Geri</string>
+    <string name="auto_refresh">Yenile</string>
+
+    <string name="auto_mode_title">Kaydırma modu</string>
+    <string name="auto_mode_desc">Zamanlı: seçilen saniyede bir kaydırır. Sürekli: durdurana kadar aralıklı kaydırır.</string>
+    <string name="auto_mode_timed">Zamanlı</string>
+    <string name="auto_mode_continuous">Sürekli</string>
+
+    <string name="auto_interval_title">Zaman aralığı</string>
+    <string name="auto_interval_desc">Zamanlı modda her kaydırma arasındaki süre. X için 15 sn önerilir.</string>
+    <string name="auto_continuous_interval_title">Sürekli mod aralığı</string>
+    <string name="auto_continuous_interval_desc">Sürekli modda kaydırmalar arasındaki kısa bekleme.</string>
+    <string name="auto_seconds">%1$d sn</string>
+
+    <string name="auto_direction_title">Kaydırma yönü</string>
+    <string name="auto_direction_desc">Yukarı kaydırma akışta alt içeriğe geçer.</string>
+    <string name="auto_direction_up">Yukarı (alt içeriğe)</string>
+    <string name="auto_direction_down">Aşağı (üst içeriğe)</string>
+    <string name="auto_direction_label_up">yukarı</string>
+    <string name="auto_direction_label_down">aşağı</string>
+
+    <!-- Bölünmüş ekran hedefi -->
+    <string name="auto_target_title">Hedef bölme</string>
+    <string name="auto_target_desc">Bölünmüş ekranda kaydırmanın gönderileceği pencere. Aktif, odaktaki uygulamadır.</string>
+    <string name="auto_target_active">Aktif</string>
+    <string name="auto_target_primary">Sol / Üst</string>
+    <string name="auto_target_secondary">Sağ / Alt</string>
+    <string name="auto_quick_target">Hedef</string>
+
+    <string name="auto_info_title">Nasıl çalışır?</string>
+    <string name="auto_info_text">Yalnızca dokunmatik kaydırma hareketi gönderir; video/reels oynatmaz ve ses açmaz. X gibi akışlarda Zamanlı + 15 sn, Reddit/Instagram gibi akışlarda Sürekli modunu kullanabilirsin. Durdurmak için aynı düğmeye bas veya bildirimdeki Durdur eylemini kullan.</string>
+
+    <string name="auto_permission_accessibility_title">Erişilebilirlik servisi</string>
+    <string name="auto_permission_accessibility_desc">Diğer uygulamalarda kaydırma hareketi göndermek için gereklidir.</string>
+    <string name="auto_permission_foreground_title">Ön plan servisi</string>
+    <string name="auto_permission_foreground_desc">Kaydırma sürerken durum bildiriminin ve durdurma kısayolunun kalması için gereklidir.</string>
+    <string name="auto_permission_post_notifications_title">Bildirim izni</string>
+    <string name="auto_permission_post_notifications_desc">Android 13+ için kalıcı durum bildirimi gereklidir.</string>
+
+    <string name="auto_permission_overlay_title">Ekran üstünde göster</string>
+    <string name="auto_permission_overlay_desc">Yalnızca yüzen aç/kapat tuşunu göstermek için gerekir; isteğe bağlıdır.</string>
+
+    <string name="auto_quick_mode">Mod</string>
+    <string name="auto_quick_interval">Aralık</string>
+    <string name="auto_quick_direction">Yön</string>
+
+    <!-- Yüzen kısayol tuşu -->
+    <string name="auto_overlay_title">Kaydırma açıkken yüzen tuş</string>
+    <string name="auto_overlay_desc">Otomatik kaydırma çalışırken ekranda küçük bir durdurma tuşu gösterir. Kaydırma durunca tuş kendiliğinden kaybolur; tuşu sürükleyerek taşıyabilirsin.</string>
+    <string name="auto_overlay_permission_needed">Yüzen tuş için ekran üstü izni gerekli. İzin ekranı açıldı; Atölye\'ye dönüp izni ver.</string>
+    <string name="auto_overlay_desc_running">Kaydırmayı durdurmak için dokun</string>
+    <string name="auto_overlay_desc_stopped">Kaydırma kapalı • tuş gizli</string>
+    <string name="auto_overlay_notif_running">Yüzen tuş • kaydırma açık</string>
+    <string name="auto_overlay_notif_stopped">Yüzen tuş • kaydırma kapalı</string>
+    <string name="auto_overlay_notif_text">Dokunarak durdur, sürükleyerek taşı</string>
+    <string name="auto_overlay_hide">Yüzen tuşu kapat</string>
+    <string name="auto_toggle_shortcut">Aç / Kapat</string>
+    <string name="auto_quick_overlay">Yüzen tuş (açıkken)</string>
+</resources>

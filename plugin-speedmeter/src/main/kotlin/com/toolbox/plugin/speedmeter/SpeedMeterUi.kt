@@ -75,6 +75,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.atolye.design.AtolyeShapes
 import com.atolye.design.AtolyeTheme
+import com.atolye.design.AtolyeThemeStore
 import com.toolbox.plugin.PluginSettingsManager
 
 /** Speed Meter ayar anahtarları. */
@@ -107,7 +108,7 @@ fun SpeedMeterScreen(
         .observeBoolean(SpeedMeterKeys.PLUGIN_ID, SpeedMeterKeys.SHOW_UPLOAD, true)
         .collectAsState()
     val unit by settings
-        .observeInt(SpeedMeterKeys.PLUGIN_ID, SpeedMeterKeys.UNIT, 0)
+        .observeInt(SpeedMeterKeys.PLUGIN_ID, SpeedMeterKeys.UNIT, 2)
         .collectAsState()
 
     var downloadSpeed by remember { mutableStateOf(0L) }
@@ -294,11 +295,16 @@ fun SpeedMeterSettingsSections(
         .observeInt(pluginId, SpeedMeterKeys.NETWORK_MODE, 0)
         .collectAsState()
     val unit by settings
-        .observeInt(pluginId, SpeedMeterKeys.UNIT, 0)
+        .observeInt(pluginId, SpeedMeterKeys.UNIT, 2)
         .collectAsState()
     val autostart by settings
         .observeBoolean(pluginId, SpeedMeterKeys.AUTOSTART, true)
         .collectAsState()
+
+    // Eski otomatik/KB/s seçimleri kalmışsa MB/s'ye taşı.
+    LaunchedEffect(Unit) {
+        if (unit != 2) settings.putInt(pluginId, SpeedMeterKeys.UNIT, 2)
+    }
 
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         SettingsSection(title = stringResource(R.string.notification_settings)) {
@@ -352,18 +358,8 @@ fun SpeedMeterSettingsSections(
 
         SettingsSection(title = stringResource(R.string.display_settings)) {
             OptionRow(
-                title = stringResource(R.string.speedmeter_unit_auto),
-                selected = unit == 0,
-                onClick = { settings.putInt(pluginId, SpeedMeterKeys.UNIT, 0) }
-            )
-            OptionRow(
-                title = stringResource(R.string.speedmeter_unit_kbps),
-                selected = unit == 1,
-                onClick = { settings.putInt(pluginId, SpeedMeterKeys.UNIT, 1) }
-            )
-            OptionRow(
                 title = stringResource(R.string.speedmeter_unit_mbps),
-                selected = unit == 2,
+                selected = true,
                 onClick = { settings.putInt(pluginId, SpeedMeterKeys.UNIT, 2) }
             )
         }
@@ -807,7 +803,9 @@ fun RequestNotificationPermission() {
 /** Eklenti içeriğini Atölye teması ile sarar. */
 @Composable
 fun SpeedMeterTheme(content: @Composable () -> Unit) {
-    AtolyeTheme {
+    val context = LocalContext.current
+    val themeType = remember(context) { AtolyeThemeStore.read(context) }
+    AtolyeTheme(themeType = themeType) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background,

@@ -64,12 +64,21 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.atolye.design.AtolyeShapes
 import com.atolye.design.AtolyeTheme
+import com.atolye.design.AtolyeThemeStore
 import com.toolbox.plugin.PluginSettingsManager
 import kotlinx.coroutines.delay
 
 @Composable
 fun SesSeciciTheme(content: @Composable () -> Unit) {
-    AtolyeTheme { Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background, content = content) }
+    val context = LocalContext.current
+    val themeType = remember(context) { AtolyeThemeStore.read(context) }
+    AtolyeTheme(themeType = themeType) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background,
+            content = content
+        )
+    }
 }
 
 @Composable
