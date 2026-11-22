@@ -1,0 +1,73 @@
+name: APK Release
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kaynak kodu al
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: JDK 17 kur
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Gradle kurulumu
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Sürümü oku
+        id: version
+        run: |
+          VERSION=$(sed -n 's/.*versionName *= *"\([^"]*\)".*/\1/p' toolbox-host/build.gradle.kts | head -n 1)
+          if [ -z "$VERSION" ]; then
+            echo "versionName bulunamadı" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Sürüm: $VERSION"
+
+      - name: APK derle
+        run: |
+          chmod +x gradlew
+          ./gradlew :toolbox-host:assembleDebug --no-daemon
+
+      - name: APK adlandır
+        run: |
+          APK="toolbox-host/build/outputs/apk/debug/toolbox-host-debug.apk"
+          test -f "$APK" || { echo "APK bulunamadı: $APK" >&2; exit 1; }
+          cp "$APK" "atolye-${{ steps.version.outputs.version }}.apk"
+          ls -lh "atolye-${{ steps.version.outputs.version }}.apk"
+
+      - name: GitHub Release oluştur / güncelle
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Atölye ${{ steps.version.outputs.version }}
+          body: |
+            Atölye ${{ steps.version.outputs.version }} otomatik derlenen APK.
+
+            - Tek APK: tüm eklentiler içinde
+            - Kurulum: indirilen APK'yı Android cihazda açın
+            - Bu dosya hata ayıklama (debug) imzasıyla derlenmiştir
+          files: atolye-${{ steps.version.outputs.version }}.apk
+          overwrite_files: true
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
